@@ -1,13 +1,28 @@
-BITCOIN CYCLE COMPASS V3
+BITCOIN CYCLE COMPASS VERSION 5 - FINAL SNAPSHOT EDITION
 
-Upload index.html, manifest.json and service-worker.js directly to the root of your GitHub repository. GitHub Pages must publish from main / root.
+PURPOSE
+A simple, reliable Bitcoin cycle snapshot for phone and desktop.
 
-The dashboard provides:
-- Live BTC AUD and USD prices with multiple fallbacks
-- Cycle drawdown and bottom/peak estimates
-- Compass AI opportunity and bottom-proximity scores
-- Top-three global liquidity destination ranking
-- Editable ETF, macro, on-chain, sentiment and liquidity research inputs
-- Clear distinction between live market data and manually maintained research assumptions
+LIVE WHEN AVAILABLE
+- Bitcoin price in AUD and USD
+- Implied AUD/USD exchange rate
+- Fear & Greed Index
+- Seven-day stablecoin supply change
 
-After uploading a new version, refresh the GitHub Pages site twice or close and reopen the Home Screen app. The service worker may retain the previous version briefly.
+MANUAL RESEARCH INPUTS
+- Bitcoin ETF flow signal
+- Macro liquidity
+- On-chain conditions
+- Top-five global liquidity rankings
+
+MODEL ESTIMATES
+- Drawdown from assumed cycle high
+- Expected next bottom range
+- Expected next peak range
+- Opportunity and bottom-proximity scores
+
+GITHUB UPDATE
+Upload index.html, manifest.json, service-worker.js and README.txt to the repository root and replace the existing files. Commit the changes. After GitHub Pages republishes, fully close and reopen the Home Screen app.
+
+IMPORTANT
+Forecasts are estimates, not certainties or financial advice.

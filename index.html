@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#111827">
 <link rel="manifest" href="manifest.json">
-<title>Bitcoin Cycle Compass</title>
+<title>Bitcoin Cycle Compass v5</title>
 <style>
 :root{
   --bg:#0b1020; --panel:#131a2d; --panel2:#18213a; --text:#eef2ff; --muted:#9aa6c0;
@@ -42,14 +42,15 @@ canvas{width:100%;height:210px;background:#0d1425;border-radius:14px;border:1px 
 .sourcegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sourceitem{padding:10px;background:#0e1527;border:1px solid var(--line);border-radius:12px;font-size:12px}
 .good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 .trend{font-size:18px;font-weight:800;min-width:28px;text-align:center}.radar{display:grid;gap:9px;margin-top:10px}.radarrow{display:grid;grid-template-columns:145px 1fr 42px;gap:9px;align-items:center}.radartrack{height:11px;border-radius:9px;background:#252f4a;overflow:hidden}.radarfill{height:100%;background:linear-gradient(90deg,#7fa9ff,#47d18c);border-radius:9px}.summarybox{margin-top:10px;padding:13px;background:#0e1527;border:1px solid var(--line);border-radius:14px;line-height:1.55}.metricgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.metric{background:#0e1527;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.metric strong{display:block;font-size:21px;margin:4px 0}
+.snapshotgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
 footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
-@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid,.metricgrid{grid-template-columns:1fr}.radarrow{grid-template-columns:105px 1fr 36px}h1{font-size:24px}.value{font-size:25px}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid,.metricgrid,.snapshotgrid{grid-template-columns:1fr}.radarrow{grid-template-columns:105px 1fr 36px}h1{font-size:24px}.value{font-size:25px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <div><h1>₿ Bitcoin Cycle Compass</h1><div class="sub">Live AUD dashboard with probability-based cycle estimates</div></div>
+  <div><h1>₿ Bitcoin Cycle Compass</h1><div class="sub">Version 5 • reliable live snapshot with disciplined cycle estimates</div></div>
   <div class="badge" id="status">Loading…</div>
 </header>
 
@@ -88,6 +89,17 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
     </table>
   </section>
 
+
+
+  <section class="card wide">
+    <div class="label">Reliable market snapshot</div>
+    <div class="metricgrid snapshotgrid">
+      <div class="metric"><span class="small">Fear & Greed</span><strong id="fearGreed">—</strong><span class="small" id="fearGreedText">Checking live feed</span></div>
+      <div class="metric"><span class="small">ETF flow signal</span><strong id="etfSignal">—</strong><span class="small">Research input</span></div>
+      <div class="metric"><span class="small">Stablecoin liquidity</span><strong id="stablecoinSignal">—</strong><span class="small" id="stablecoinText">Checking live feed</span></div>
+      <div class="metric"><span class="small">Snapshot freshness</span><strong id="snapshotFreshness">—</strong><span class="small" id="snapshotFreshnessText">Price + research status</span></div>
+    </div>
+  </section>
 
   <section class="card wide">
     <div class="label">Compass AI research summary</div>
@@ -131,7 +143,8 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
       <label>Bitcoin ETF flow score (-10 to +10)<input id="etfScore" type="number" min="-10" max="10" value="1"></label>
       <label>Macro liquidity score (-10 to +10)<input id="macroScore" type="number" min="-10" max="10" value="0"></label>
       <label>On-chain score (-10 to +10)<input id="onchainScore" type="number" min="-10" max="10" value="-2"></label>
-      <label>Sentiment score (-10 to +10)<input id="sentimentScore" type="number" min="-10" max="10" value="-1"></label>
+      <label>Sentiment fallback (-10 to +10)<input id="sentimentScore" type="number" min="-10" max="10" value="-1"></label>
+      <label>Stablecoin fallback (-10 to +10)<input id="stablecoinScore" type="number" min="-10" max="10" value="1"></label>
       <label>Gold liquidity score (0 to 100)<input id="goldLiquidity" type="number" min="0" max="100" value="78"></label>
       <label>Equity liquidity score (0 to 100)<input id="equityLiquidity" type="number" min="0" max="100" value="73"></label>
       <label>Bitcoin liquidity score (0 to 100)<input id="bitcoinLiquidity" type="number" min="0" max="100" value="66"></label>
@@ -145,6 +158,8 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
       <div class="sourceitem"><strong>ETF flows</strong><br><span class="warn">Manual research score</span></div>
       <div class="sourceitem"><strong>Macro liquidity</strong><br><span class="warn">Manual research score</span></div>
       <div class="sourceitem"><strong>On-chain metrics</strong><br><span class="warn">Manual research score</span></div>
+      <div class="sourceitem"><strong>Fear & Greed</strong><br><span id="fearSource" class="warn">Checking public feed</span></div>
+      <div class="sourceitem"><strong>Stablecoin supply</strong><br><span id="stableSource" class="warn">Checking public feed</span></div>
     </div>
   </section>
 
@@ -176,13 +191,13 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
 </div>
 
 <footer>
-Live price sources: CoinGecko, Coinbase and Kraken fallbacks. AUD/USD is implied from BTC quotes. Research scores are manually maintained and clearly labelled. The page refreshes automatically while open. For a Home Screen icon and full app-like behaviour, host these files on an HTTPS site such as GitHub Pages.
+Live price sources: CoinGecko, Coinbase and Kraken fallbacks. AUD/USD is implied from BTC quotes. Research scores are clearly labelled as live or manually maintained. The page refreshes automatically while open. For a Home Screen icon and full app-like behaviour, host these files on an HTTPS site such as GitHub Pages.
 </footer>
 </div>
 
 <script>
-const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556,etfScore:1,macroScore:0,onchainScore:-2,sentimentScore:-1,goldLiquidity:78,equityLiquidity:73,bitcoinLiquidity:66,silverLiquidity:64,emergingLiquidity:61};
-let timer=null, lastData=null;
+const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556,etfScore:1,macroScore:0,onchainScore:-2,sentimentScore:-1,stablecoinScore:1,goldLiquidity:78,equityLiquidity:73,bitcoinLiquidity:66,silverLiquidity:64,emergingLiquidity:61};
+let timer=null, lastData=null, researchLive={fear:null,fearLabel:null,stablecoinChange:null};
 const $=id=>document.getElementById(id);
 const fmtAUD=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n);
 const fmtUSD=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
@@ -216,8 +231,35 @@ async function fetchJSON(url, timeoutMs=9000){
     return await r.json();
   } finally { clearTimeout(t); }
 }
+async function fetchResearchSnapshot(){
+  researchLive={fear:null,fearLabel:null,stablecoinChange:null};
+  try{
+    const f=await fetchJSON('https://api.alternative.me/fng/?limit=8&format=json',7000);
+    const rows=f.data||[];
+    if(rows.length){
+      researchLive.fear=Number(rows[0].value);
+      researchLive.fearLabel=rows[0].value_classification||'';
+      $('fearSource').textContent='Live public feed'; $('fearSource').className='good';
+    }
+  }catch(e){ $('fearSource').textContent='Manual fallback active'; $('fearSource').className='warn'; }
+  try{
+    const st=await fetchJSON('https://stablecoins.llama.fi/stablecoins?includePrices=true',8000);
+    const assets=st.peggedAssets||[];
+    let now=0,week=0;
+    assets.forEach(a=>{
+      now+=Number(a.circulating?.peggedUSD||0);
+      week+=Number(a.circulatingPrevWeek?.peggedUSD||0);
+    });
+    if(now>0 && week>0){
+      researchLive.stablecoinChange=(now/week-1)*100;
+      $('stableSource').textContent='Live public feed'; $('stableSource').className='good';
+    }
+  }catch(e){ $('stableSource').textContent='Manual fallback active'; $('stableSource').className='warn'; }
+}
+
 async function fetchData(){
   $('status').textContent='Updating…';
+  fetchResearchSnapshot().then(()=>{if(lastData) calculate(lastData)});
   $('dataMessage').textContent='Checking live price sources…';
   const errors=[];
   try{
@@ -310,7 +352,9 @@ function calculate(d){
 }
 
 function updateResearch(drawdown,s){
-  const researchRaw=s.etfScore+s.macroScore+s.onchainScore+s.sentimentScore;
+  const liveSentiment=researchLive.fear===null ? s.sentimentScore : Math.max(-10,Math.min(10,(researchLive.fear-50)/5));
+  const liveStable=researchLive.stablecoinChange===null ? s.stablecoinScore : Math.max(-10,Math.min(10,researchLive.stablecoinChange*2));
+  const researchRaw=s.etfScore+s.macroScore+s.onchainScore+liveSentiment+liveStable;
   const cycleComponent=Math.max(0,Math.min(55,drawdown*0.75));
   const opportunity=Math.max(0,Math.min(100,Math.round(42+cycleComponent+researchRaw*1.3)));
   const bottomProb=Math.max(5,Math.min(90,Math.round(18+drawdown*0.72-researchRaw*0.8)));
@@ -321,6 +365,15 @@ function updateResearch(drawdown,s){
   $('opportunityText').textContent=opportunity>=75?'Strong accumulation zone':opportunity>=58?'Gradual accumulation zone':'Wait and monitor';
   $('bottomProbability').textContent=bottomProb+'%';
   $('researchConfidence').textContent=confidence+'%';
+  $('fearGreed').textContent=researchLive.fear===null?'Manual':Math.round(researchLive.fear)+'/100';
+  $('fearGreedText').textContent=researchLive.fear===null?'Fallback score '+s.sentimentScore:(researchLive.fearLabel||'Live sentiment');
+  $('etfSignal').textContent=(s.etfScore>0?'+':'')+s.etfScore;
+  $('stablecoinSignal').textContent=researchLive.stablecoinChange===null?'Manual':(researchLive.stablecoinChange>=0?'+':'')+researchLive.stablecoinChange.toFixed(1)+'%';
+  $('stablecoinText').textContent=researchLive.stablecoinChange===null?'Fallback score '+s.stablecoinScore:'7-day supply change';
+  const liveCount=(researchLive.fear!==null?1:0)+(researchLive.stablecoinChange!==null?1:0)+1;
+  const freshScore=Math.max(35,Math.min(100,Math.round(confidence*.65+liveCount*10)));
+  $('snapshotFreshness').textContent=freshScore+'%';
+  $('snapshotFreshnessText').textContent=liveCount===3?'Price + two live signals':'Some fallback inputs active';
 
   const rankings=[
     {name:'Gold & precious metals',score:s.goldLiquidity,why:'Central-bank demand, fiscal risk and geopolitical hedging'},
@@ -342,9 +395,9 @@ function updateResearch(drawdown,s){
   });
 
   const avgLiquidity=rankings.reduce((a,r)=>a+Number(r.score),0)/rankings.length;
-  const liquidityMomentum=Math.max(0,Math.min(100,Math.round(avgLiquidity+2*s.macroScore)));
-  const institutional=Math.max(0,Math.min(100,Math.round(55+s.etfScore*4+s.onchainScore)));
-  const risk=Math.max(0,Math.min(100,Math.round(52+s.sentimentScore*4+s.macroScore*2)));
+  const liquidityMomentum=Math.max(0,Math.min(100,Math.round(avgLiquidity+2*s.macroScore+liveStable)));
+  const institutional=Math.max(0,Math.min(100,Math.round(55+s.etfScore*4+s.onchainScore+liveStable*.5)));
+  const risk=Math.max(0,Math.min(100,Math.round(52+liveSentiment*4+s.macroScore*2)));
   const macro=Math.max(0,Math.min(100,Math.round(50+s.macroScore*5)));
   const cycleConf=Math.max(30,Math.min(95,Math.round(confidence*0.65+Math.min(100,drawdown)*0.35)));
   $('liquidityMomentum').textContent=liquidityMomentum+'/100';
