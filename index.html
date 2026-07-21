@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<title>Bitcoin Cycle Compass</title>
+<style>
+:root{
+  --bg:#0b1020; --panel:#131a2d; --panel2:#18213a; --text:#eef2ff; --muted:#9aa6c0;
+  --line:#2a3553; --good:#47d18c; --warn:#f7c65f; --bad:#ff7a7a; --accent:#7fa9ff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:
+radial-gradient(circle at top right,#172342 0,#0b1020 42%);color:var(--text)}
+.wrap{max-width:920px;margin:auto;padding:18px 14px 40px}
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin:6px 0 16px}
+h1{font-size:28px;margin:0 0 5px}.sub{color:var(--muted);font-size:14px}
+.badge{background:#202b49;border:1px solid var(--line);padding:8px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:15px;box-shadow:0 14px 35px rgba(0,0,0,.18)}
+.card.wide{grid-column:1/-1}.label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.value{font-size:27px;font-weight:760;margin-top:5px}.small{font-size:13px;color:var(--muted);line-height:1.45}
+.range{font-size:21px;font-weight:730;margin-top:5px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:10px 0}
+.bar{height:10px;border-radius:8px;background:#252f4a;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,#7fa9ff,#47d18c);width:50%}
+button{appearance:none;border:0;border-radius:13px;padding:12px 14px;background:#7fa9ff;color:#07101e;font-weight:750;font-size:14px}
+button.secondary{background:#222d49;color:var(--text);border:1px solid var(--line)}
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{font-size:12px;color:var(--muted)}
+input{width:100%;margin-top:5px;padding:11px;border-radius:11px;border:1px solid var(--line);background:#0e1527;color:var(--text);font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}
+canvas{width:100%;height:210px;background:#0d1425;border-radius:14px;border:1px solid var(--line)}
+.notice{padding:11px 12px;border-radius:13px;background:#101a31;border:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.5}
+footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls{grid-template-columns:1fr}h1{font-size:24px}.value{font-size:25px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>₿ Bitcoin Cycle Compass</h1><div class="sub">Live AUD dashboard with probability-based cycle estimates</div></div>
+  <div class="badge" id="status">Loading…</div>
+</header>
+
+<div class="grid">
+  <section class="card">
+    <div class="label">Bitcoin now</div><div class="value" id="btcAud">—</div>
+    <div class="small" id="btcUsd">—</div>
+  </section>
+  <section class="card">
+    <div class="label">Drawdown from assumed cycle high</div><div class="value" id="drawdown">—</div>
+    <div class="small" id="peakAud">—</div>
+  </section>
+
+  <section class="card">
+    <div class="label">Expected next bottom</div><div class="range" id="bottomRange">—</div>
+    <div class="small" id="bottomTiming">Base timing: Oct 2026 to Jan 2027</div>
+  </section>
+  <section class="card">
+    <div class="label">Expected next peak</div><div class="range" id="nextPeakRange">—</div>
+    <div class="small">Base timing: Aug to Dec 2029</div>
+  </section>
+
+  <section class="card wide">
+    <div class="row"><div><div class="label">Cycle position</div><div class="small" id="cycleText">Estimating…</div></div><button id="refresh">Refresh now</button></div>
+    <div class="bar"><div class="fill" id="cycleBar"></div></div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Probability ranges</div>
+    <table>
+      <thead><tr><th>Outcome</th><th>Bear case</th><th>Base case</th><th>Bull case</th></tr></thead>
+      <tbody>
+        <tr><td>Next bottom</td><td id="bBear">—</td><td id="bBase">—</td><td id="bBull">—</td></tr>
+        <tr><td>Next peak</td><td id="pBear">—</td><td id="pBase">—</td><td id="pBull">—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Historical diminishing returns</div>
+    <canvas id="chart" width="860" height="240"></canvas>
+    <div class="small" style="margin-top:8px">Bottom-to-peak multiples used: 130×, 21.6×, 8.1×, then an estimated 3× to 5× for the next cycle.</div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Model settings</div>
+    <div class="controls">
+      <label>Latest cycle high, USD<input id="cycleHighUsd" type="number" value="126200"></label>
+      <label>Expected bottom drawdown, %<input id="bottomDrawdown" type="number" value="66" min="30" max="90"></label>
+      <label>Bear peak multiple from bottom<input id="bearMultiple" type="number" value="3" step="0.1"></label>
+      <label>Base peak multiple from bottom<input id="baseMultiple" type="number" value="4.2" step="0.1"></label>
+      <label>Bull peak multiple from bottom<input id="bullMultiple" type="number" value="5.5" step="0.1"></label>
+      <label>Auto-refresh minutes<input id="refreshMinutes" type="number" value="15" min="5"></label>
+      <label>Manual BTC price, AUD<input id="manualAud" type="number" value="92200"></label>
+      <label>Manual BTC price, USD<input id="manualUsd" type="number" value="64556"></label>
+    </div>
+    <div class="row"><button class="secondary" id="saveSettings">Save settings</button><button class="secondary" id="useManual">Use manual prices</button><button class="secondary" id="resetSettings">Reset</button></div>
+    <div class="small" id="dataMessage" style="margin-top:8px">Trying live price sources…</div>
+  </section>
+
+  <section class="card wide notice">
+    This is a statistical scenario tool, not a prediction engine or financial advice. It updates live price and FX data, but cycle highs, timing windows and return multiples remain assumptions. The model is most useful for disciplined ranges, not crystal-ball theatre.
+  </section>
+</div>
+
+<footer>
+Price source: CoinGecko public API. AUD/USD is implied from the live AUD and USD Bitcoin quotes. The page refreshes automatically while open. For a Home Screen icon and full app-like behaviour, host these files on an HTTPS site such as GitHub Pages.
+</footer>
+</div>
+
+<script>
+const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556};
+let timer=null, lastData=null;
+const $=id=>document.getElementById(id);
+const fmtAUD=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n);
+const fmtUSD=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+
+function loadSettings(){
+  const saved=JSON.parse(localStorage.getItem('btcCompassSettings')||'{}');
+  const s={...defaults,...saved};
+  Object.keys(defaults).forEach(k=>$(k).value=s[k]);
+  return s;
+}
+function getSettings(){
+  const s={};
+  Object.keys(defaults).forEach(k=>s[k]=Number($(k).value));
+  return s;
+}
+function saveSettings(){
+  localStorage.setItem('btcCompassSettings',JSON.stringify(getSettings()));
+  calculate(lastData); schedule();
+}
+function resetSettings(){
+  localStorage.removeItem('btcCompassSettings'); loadSettings(); calculate(lastData); schedule();
+}
+async function fetchJSON(url, timeoutMs=9000){
+  const controller=new AbortController();
+  const t=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+    const r=await fetch(url,{cache:'no-store',signal:controller.signal});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+async function fetchData(){
+  $('status').textContent='Updating…';
+  $('dataMessage').textContent='Checking live price sources…';
+  const errors=[];
+  try{
+    try{
+      const j=await fetchJSON('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=aud,usd&include_last_updated_at=true');
+      if(!j.bitcoin?.aud || !j.bitcoin?.usd) throw new Error('Incomplete response');
+      lastData={aud:Number(j.bitcoin.aud),usd:Number(j.bitcoin.usd),updated:(j.bitcoin.last_updated_at||Date.now()/1000)*1000,source:'CoinGecko'};
+    }catch(e){
+      errors.push('CoinGecko: '+e.message);
+      try{
+        const [u,a]=await Promise.all([
+          fetchJSON('https://api.coinbase.com/v2/prices/BTC-USD/spot'),
+          fetchJSON('https://api.coinbase.com/v2/prices/BTC-AUD/spot')
+        ]);
+        lastData={aud:Number(a.data.amount),usd:Number(u.data.amount),updated:Date.now(),source:'Coinbase'};
+      }catch(e2){
+        errors.push('Coinbase: '+e2.message);
+        try{
+          const j=await fetchJSON('https://api.kraken.com/0/public/Ticker?pair=XBTUSD,XBTAUD');
+          const vals=Object.values(j.result||{});
+          const usd=vals.find(v=>Number(v.c?.[0])>1000 && Number(v.c?.[0])<500000);
+          const nums=vals.map(v=>Number(v.c?.[0])).filter(Boolean).sort((a,b)=>a-b);
+          if(nums.length<2) throw new Error('Incomplete response');
+          lastData={usd:nums[0],aud:nums[1],updated:Date.now(),source:'Kraken'};
+        }catch(e3){ errors.push('Kraken: '+e3.message); }
+      }
+    }
+    if(!lastData) throw new Error(errors.join(' | '));
+    localStorage.setItem('btcCompassLast',JSON.stringify(lastData));
+    $('dataMessage').textContent='Live data source: '+lastData.source+'.';
+    calculate(lastData);
+  }catch(e){
+    const cached=JSON.parse(localStorage.getItem('btcCompassLast')||'null');
+    if(cached){
+      lastData=cached;
+      $('dataMessage').textContent='Live feeds are blocked. Showing the last saved prices. Open through an HTTPS website for automatic updates.';
+      calculate(lastData);
+      $('status').textContent='Cached data';
+    }else{
+      useManualPrices();
+      $('dataMessage').textContent='Live feeds are blocked by this viewer. Manual prices are active. For automatic updates, open the hosted HTTPS version in Safari.';
+      $('status').textContent='Manual mode';
+    }
+  }
+}
+function useManualPrices(){
+  const s=getSettings();
+  lastData={aud:Number(s.manualAud),usd:Number(s.manualUsd),updated:Date.now(),source:'Manual'};
+  localStorage.setItem('btcCompassLast',JSON.stringify(lastData));
+  calculate(lastData);
+  $('status').textContent='Manual mode';
+  $('dataMessage').textContent='Manual prices are active. Change them above and tap “Use manual prices”.';
+}
+function calculate(d){
+  if(!d) return;
+  const s=getSettings();
+  const usdAud=d.aud/d.usd;
+  const peakAud=s.cycleHighUsd*usdAud;
+  const dd=(1-d.aud/peakAud)*100;
+  const baseBottom=peakAud*(1-s.bottomDrawdown/100);
+  const bearBottom=peakAud*(1-0.75);
+  const bullBottom=peakAud*(1-0.58);
+  const low=Math.min(baseBottom*0.88,baseBottom);
+  const high=Math.max(baseBottom*1.12,baseBottom);
+  const bearPeak=baseBottom*s.bearMultiple;
+  const basePeak=baseBottom*s.baseMultiple;
+  const bullPeak=baseBottom*s.bullMultiple;
+
+  $('btcAud').textContent=fmtAUD(d.aud);
+  $('btcUsd').textContent=fmtUSD(d.usd)+' • AUD/USD implied '+(1/usdAud).toFixed(3);
+  $('drawdown').textContent=(dd>=0?'-':'')+Math.abs(dd).toFixed(1)+'%';
+  $('peakAud').textContent='Assumed cycle high ≈ '+fmtAUD(peakAud);
+  $('bottomRange').textContent=fmtAUD(low)+'–'+fmtAUD(high);
+  $('nextPeakRange').textContent=fmtAUD(bearPeak)+'–'+fmtAUD(bullPeak);
+  $('bBear').textContent=fmtAUD(bearBottom);
+  $('bBase').textContent=fmtAUD(baseBottom);
+  $('bBull').textContent=fmtAUD(bullBottom);
+  $('pBear').textContent=fmtAUD(bearPeak);
+  $('pBase').textContent=fmtAUD(basePeak);
+  $('pBull').textContent=fmtAUD(bullPeak);
+
+  const start=new Date('2025-10-06T00:00:00Z').getTime();
+  const end=new Date('2027-01-01T00:00:00Z').getTime();
+  const progress=Math.max(0,Math.min(100,(Date.now()-start)/(end-start)*100));
+  $('cycleBar').style.width=progress+'%';
+  $('cycleText').textContent=progress.toFixed(0)+'% through the assumed peak-to-bottom window';
+  $('status').textContent=(d.source||'Data')+' • '+new Date(d.updated||Date.now()).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  drawChart([130,21.6,8.1,s.baseMultiple]);
+}
+function drawChart(vals){
+  const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h); ctx.fillStyle='#0d1425';ctx.fillRect(0,0,w,h);
+  const pad=38,max=Math.max(...vals),labels=['2015→17','2018→21','2022→25','2026→29'];
+  ctx.strokeStyle='#2a3553';ctx.lineWidth=1;
+  for(let i=0;i<4;i++){let y=25+i*50;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-16,y);ctx.stroke();}
+  vals.forEach((v,i)=>{
+    const x=pad+70+i*190,barH=Math.max(8,(v/max)*(h-70)),y=h-38-barH;
+    const g=ctx.createLinearGradient(0,y,0,h-38);g.addColorStop(0,'#7fa9ff');g.addColorStop(1,'#47d18c');
+    ctx.fillStyle=g;ctx.fillRect(x,y,92,barH);
+    ctx.fillStyle='#eef2ff';ctx.font='bold 16px -apple-system';ctx.textAlign='center';ctx.fillText(v+'×',x+46,y-8);
+    ctx.fillStyle='#9aa6c0';ctx.font='13px -apple-system';ctx.fillText(labels[i],x+46,h-16);
+  });
+}
+function schedule(){
+  clearInterval(timer);
+  const mins=Math.max(5,getSettings().refreshMinutes||15);
+  timer=setInterval(fetchData,mins*60000);
+}
+$('refresh').onclick=fetchData;$('saveSettings').onclick=saveSettings;$('useManual').onclick=useManualPrices;$('resetSettings').onclick=resetSettings;
+loadSettings();fetchData();schedule();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}
+</script>
+</body>
+</html>
