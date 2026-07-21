@@ -45,8 +45,15 @@ canvas{width:100%;height:210px;background:#0d1425;border-radius:14px;border:1px 
 .move{display:block;font-size:12px;font-weight:750;margin-top:3px}
 .trend{font-size:18px;font-weight:800;min-width:28px;text-align:center}.radar{display:grid;gap:9px;margin-top:10px}.radarrow{display:grid;grid-template-columns:145px 1fr 42px;gap:9px;align-items:center}.radartrack{height:11px;border-radius:9px;background:#252f4a;overflow:hidden}.radarfill{height:100%;background:linear-gradient(90deg,#7fa9ff,#47d18c);border-radius:9px}.summarybox{margin-top:10px;padding:13px;background:#0e1527;border:1px solid var(--line);border-radius:14px;line-height:1.55}.metricgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.metric{background:#0e1527;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.metric strong{display:block;font-size:21px;margin:4px 0}
 .snapshotgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.score-good{background:rgba(71,209,140,.15)!important;border-color:rgba(71,209,140,.55)!important;color:var(--good)!important}
+.score-watch{background:rgba(247,198,95,.15)!important;border-color:rgba(247,198,95,.55)!important;color:var(--warn)!important}
+.score-bad{background:rgba(255,122,122,.14)!important;border-color:rgba(255,122,122,.55)!important;color:var(--bad)!important}
+.scorebox.score-good .small,.scorebox.score-watch .small,.scorebox.score-bad .small,.metric.score-good .small,.metric.score-watch .small,.metric.score-bad .small{color:inherit;opacity:.88}
+.pill.score-good,.pill.score-watch,.pill.score-bad{font-weight:850;color:inherit!important}
+.todaygrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.todayitem{padding:12px;border-radius:13px;text-align:center;border:1px solid var(--line);background:#0e1527}.todayitem strong{display:block;font-size:22px;margin-top:3px}
+
 footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
-@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid,.metricgrid,.snapshotgrid{grid-template-columns:1fr}.radarrow{grid-template-columns:105px 1fr 36px}h1{font-size:24px}.value{font-size:25px}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid,.metricgrid,.snapshotgrid,.todaygrid{grid-template-columns:1fr}.radarrow{grid-template-columns:105px 1fr 36px}h1{font-size:24px}.value{font-size:25px}}
 </style>
 </head>
 <body>
@@ -92,6 +99,17 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
   </section>
 
 
+
+
+  <section class="card wide">
+    <div class="label">Today’s snapshot</div>
+    <div class="todaygrid">
+      <div class="todayitem score-good"><span class="small">Positive signals</span><strong id="positiveCount">—</strong></div>
+      <div class="todayitem score-watch"><span class="small">Watch / neutral</span><strong id="neutralCount">—</strong></div>
+      <div class="todayitem score-bad"><span class="small">Negative signals</span><strong id="negativeCount">—</strong></div>
+      <div class="todayitem" id="overallRegimeBox"><span class="small">Overall regime</span><strong id="overallRegime">—</strong></div>
+    </div>
+  </section>
 
   <section class="card wide">
     <div class="label">Reliable market snapshot</div>
@@ -387,6 +405,9 @@ function calculate(d){
   drawChart([130,21.6,8.1,s.baseMultiple]);
 }
 
+function scoreClass(value){return value>=75?'score-good':value>=50?'score-watch':'score-bad'}
+function applyScoreClass(id,value){const el=$(id);if(!el)return;el.classList.remove('score-good','score-watch','score-bad');el.classList.add(scoreClass(value));}
+function applyParentScoreClass(id,value){const el=$(id);if(!el)return;const box=el.closest('.scorebox,.metric');if(!box)return;box.classList.remove('score-good','score-watch','score-bad');box.classList.add(scoreClass(value));}
 function updateResearch(drawdown,s){
   const liveSentiment=researchLive.fear===null ? s.sentimentScore : Math.max(-10,Math.min(10,(researchLive.fear-50)/5));
   const liveStable=researchLive.stablecoinChange===null ? s.stablecoinScore : Math.max(-10,Math.min(10,researchLive.stablecoinChange*2));
@@ -401,6 +422,9 @@ function updateResearch(drawdown,s){
   $('opportunityText').textContent=opportunity>=75?'Strong accumulation zone':opportunity>=58?'Gradual accumulation zone':'Wait and monitor';
   $('bottomProbability').textContent=bottomProb+'%';
   $('researchConfidence').textContent=confidence+'%';
+  applyParentScoreClass('opportunityScore',opportunity);
+  applyParentScoreClass('bottomProbability',bottomProb);
+  applyParentScoreClass('researchConfidence',confidence);
   const baseline=get24hResearchBaseline();
   if(baseline){
     setMove('opportunityMove',opportunity-baseline.opportunity,' points',true);
@@ -447,7 +471,7 @@ function updateResearch(drawdown,s){
     const previous=Number(localStorage.getItem('liqPrev_'+r.name));
     const trend=!previous?'→':r.score>previous+1?'↑':r.score<previous-1?'↓':'→';
     const trendClass=trend==='↑'?'good':trend==='↓'?'bad':'warn';
-    rankWrap.insertAdjacentHTML('beforeend',`<div class="rank"><div class="ranknum">${i+1}</div><div class="rankbody"><strong>${r.name}</strong><div class="small">${r.why}</div></div><div class="trend ${trendClass}">${trend}</div><div class="pill">${Math.round(r.score)}/100</div></div>`);
+    rankWrap.insertAdjacentHTML('beforeend',`<div class="rank"><div class="ranknum">${i+1}</div><div class="rankbody"><strong>${r.name}</strong><div class="small">${r.why}</div></div><div class="trend ${trendClass}">${trend}</div><div class="pill ${scoreClass(r.score)}">${Math.round(r.score)}/100</div></div>`);
     radar.insertAdjacentHTML('beforeend',`<div class="radarrow"><div class="small">${r.name.replace(' & digital assets','').replace(' & precious metals','')}</div><div class="radartrack"><div class="radarfill" style="width:${Math.max(2,Math.min(100,r.score))}%"></div></div><div class="small">${Math.round(r.score)}</div></div>`);
     localStorage.setItem('liqPrev_'+r.name,r.score);
   });
@@ -464,6 +488,16 @@ function updateResearch(drawdown,s){
   $('riskScore').textContent=risk+'/100';
   $('macroTailwind').textContent=macro+'/100';
   $('cycleConfidence').textContent=cycleConf+'/100';
+  [['liquidityMomentum',liquidityMomentum],['institutionalScore',institutional],['riskScore',risk],['macroTailwind',macro],['cycleConfidence',cycleConf]].forEach(([id,v])=>applyParentScoreClass(id,v));
+
+  const allSignals=[opportunity,bottomProb,confidence,...rankings.map(r=>Number(r.score)),liquidityMomentum,institutional,risk,macro,cycleConf];
+  const positives=allSignals.filter(v=>v>=75).length;
+  const neutrals=allSignals.filter(v=>v>=50&&v<75).length;
+  const negatives=allSignals.filter(v=>v<50).length;
+  const overall=Math.round(allSignals.reduce((a,v)=>a+v,0)/allSignals.length);
+  $('positiveCount').textContent=positives; $('neutralCount').textContent=neutrals; $('negativeCount').textContent=negatives;
+  $('overallRegime').textContent=overall>=75?'RISK ON':overall>=50?'MIXED / WATCH':'RISK OFF';
+  const ob=$('overallRegimeBox');ob.classList.remove('score-good','score-watch','score-bad');ob.classList.add(scoreClass(overall));
 
   const top=rankings.slice(0,3);
   const weakest=rankings[rankings.length-1];
