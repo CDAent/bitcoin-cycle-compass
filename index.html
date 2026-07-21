@@ -41,8 +41,9 @@ canvas{width:100%;height:210px;background:#0d1425;border-radius:14px;border:1px 
 .rankbody{flex:1}.pill{font-size:11px;border:1px solid var(--line);padding:4px 7px;border-radius:999px;color:var(--muted)}
 .sourcegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sourceitem{padding:10px;background:#0e1527;border:1px solid var(--line);border-radius:12px;font-size:12px}
 .good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.trend{font-size:18px;font-weight:800;min-width:28px;text-align:center}.radar{display:grid;gap:9px;margin-top:10px}.radarrow{display:grid;grid-template-columns:145px 1fr 42px;gap:9px;align-items:center}.radartrack{height:11px;border-radius:9px;background:#252f4a;overflow:hidden}.radarfill{height:100%;background:linear-gradient(90deg,#7fa9ff,#47d18c);border-radius:9px}.summarybox{margin-top:10px;padding:13px;background:#0e1527;border:1px solid var(--line);border-radius:14px;line-height:1.55}.metricgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.metric{background:#0e1527;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.metric strong{display:block;font-size:21px;margin:4px 0}
 footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
-@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid{grid-template-columns:1fr}h1{font-size:24px}.value{font-size:25px}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid,.metricgrid{grid-template-columns:1fr}.radarrow{grid-template-columns:105px 1fr 36px}h1{font-size:24px}.value{font-size:25px}}
 </style>
 </head>
 <body>
@@ -98,11 +99,30 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
   </section>
 
   <section class="card wide">
-    <div class="label">Top 3 estimated global liquidity destinations</div>
-    <div class="rank"><div class="ranknum">1</div><div class="rankbody"><strong id="liq1Name">Gold & precious metals</strong><div class="small" id="liq1Why">Central-bank demand, fiscal risk and geopolitical hedging</div></div><div class="pill" id="liq1Score">78/100</div></div>
-    <div class="rank"><div class="ranknum">2</div><div class="rankbody"><strong id="liq2Name">US large-cap & AI equities</strong><div class="small" id="liq2Why">Earnings concentration, capex and passive fund flows</div></div><div class="pill" id="liq2Score">73/100</div></div>
-    <div class="rank"><div class="ranknum">3</div><div class="rankbody"><strong id="liq3Name">Bitcoin & digital assets</strong><div class="small" id="liq3Why">ETF access, stablecoin liquidity and asymmetric cycle upside</div></div><div class="pill" id="liq3Score">66/100</div></div>
-    <div class="small" style="margin-top:9px">These rankings are model estimates based on the research sliders below. They are not direct measurements of every global capital flow.</div>
+    <div class="label">Top 5 estimated global liquidity destinations</div>
+    <div id="liquidityRanks"></div>
+    <div class="small" style="margin-top:9px">Rankings are model estimates based on the research inputs below. They are directional signals, not a complete measurement of every global capital flow.</div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Money flow radar</div>
+    <div class="radar" id="moneyFlowRadar"></div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Market regime scores</div>
+    <div class="metricgrid">
+      <div class="metric"><span class="small">Liquidity momentum</span><strong id="liquidityMomentum">—</strong><span class="small" id="liquidityMomentumText">—</span></div>
+      <div class="metric"><span class="small">Institutional buying</span><strong id="institutionalScore">—</strong><span class="small">ETF-led estimate</span></div>
+      <div class="metric"><span class="small">Risk appetite</span><strong id="riskScore">—</strong><span class="small">Sentiment-led estimate</span></div>
+      <div class="metric"><span class="small">Macro tailwind</span><strong id="macroTailwind">—</strong><span class="small">Liquidity-led estimate</span></div>
+      <div class="metric"><span class="small">Cycle confidence</span><strong id="cycleConfidence">—</strong><span class="small">Timing + research freshness</span></div>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Where is the smart money going?</div>
+    <div class="summarybox" id="smartMoneySummary">Calculating the current capital-flow picture…</div>
   </section>
 
   <section class="card wide">
@@ -115,6 +135,8 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
       <label>Gold liquidity score (0 to 100)<input id="goldLiquidity" type="number" min="0" max="100" value="78"></label>
       <label>Equity liquidity score (0 to 100)<input id="equityLiquidity" type="number" min="0" max="100" value="73"></label>
       <label>Bitcoin liquidity score (0 to 100)<input id="bitcoinLiquidity" type="number" min="0" max="100" value="66"></label>
+      <label>Silver liquidity score (0 to 100)<input id="silverLiquidity" type="number" min="0" max="100" value="64"></label>
+      <label>Emerging markets score (0 to 100)<input id="emergingLiquidity" type="number" min="0" max="100" value="61"></label>
       <label>Research updated date<input id="researchDate" type="date" value="2026-07-21"></label>
     </div>
     <div class="row"><button class="secondary" id="saveResearch">Save research inputs</button></div>
@@ -159,7 +181,7 @@ Live price sources: CoinGecko, Coinbase and Kraken fallbacks. AUD/USD is implied
 </div>
 
 <script>
-const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556,etfScore:1,macroScore:0,onchainScore:-2,sentimentScore:-1,goldLiquidity:78,equityLiquidity:73,bitcoinLiquidity:66};
+const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556,etfScore:1,macroScore:0,onchainScore:-2,sentimentScore:-1,goldLiquidity:78,equityLiquidity:73,bitcoinLiquidity:66,silverLiquidity:64,emergingLiquidity:61};
 let timer=null, lastData=null;
 const $=id=>document.getElementById(id);
 const fmtAUD=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n);
@@ -299,14 +321,44 @@ function updateResearch(drawdown,s){
   $('opportunityText').textContent=opportunity>=75?'Strong accumulation zone':opportunity>=58?'Gradual accumulation zone':'Wait and monitor';
   $('bottomProbability').textContent=bottomProb+'%';
   $('researchConfidence').textContent=confidence+'%';
+
   const rankings=[
     {name:'Gold & precious metals',score:s.goldLiquidity,why:'Central-bank demand, fiscal risk and geopolitical hedging'},
-    {name:'US large-cap & AI equities',score:s.equityLiquidity,why:'Earnings concentration, capex and passive fund flows'},
-    {name:'Bitcoin & digital assets',score:s.bitcoinLiquidity,why:'ETF access, stablecoin liquidity and asymmetric cycle upside'}
+    {name:'US large-cap & AI equities',score:s.equityLiquidity,why:'Earnings concentration, AI capital expenditure and passive flows'},
+    {name:'Bitcoin & digital assets',score:s.bitcoinLiquidity,why:'ETF access, stablecoin liquidity and asymmetric cycle upside'},
+    {name:'Silver',score:s.silverLiquidity,why:'Monetary demand plus industrial and energy-transition use'},
+    {name:'Emerging-market assets',score:s.emergingLiquidity,why:'Valuation discounts, softer US dollar potential and improving domestic liquidity'}
   ].sort((a,b)=>b.score-a.score);
-  rankings.forEach((r,i)=>{const n=i+1;$('liq'+n+'Name').textContent=r.name;$('liq'+n+'Why').textContent=r.why;$('liq'+n+'Score').textContent=Math.round(r.score)+'/100'});
-}
 
+  const rankWrap=$('liquidityRanks'); rankWrap.innerHTML='';
+  const radar=$('moneyFlowRadar'); radar.innerHTML='';
+  rankings.forEach((r,i)=>{
+    const previous=Number(localStorage.getItem('liqPrev_'+r.name));
+    const trend=!previous?'→':r.score>previous+1?'↑':r.score<previous-1?'↓':'→';
+    const trendClass=trend==='↑'?'good':trend==='↓'?'bad':'warn';
+    rankWrap.insertAdjacentHTML('beforeend',`<div class="rank"><div class="ranknum">${i+1}</div><div class="rankbody"><strong>${r.name}</strong><div class="small">${r.why}</div></div><div class="trend ${trendClass}">${trend}</div><div class="pill">${Math.round(r.score)}/100</div></div>`);
+    radar.insertAdjacentHTML('beforeend',`<div class="radarrow"><div class="small">${r.name.replace(' & digital assets','').replace(' & precious metals','')}</div><div class="radartrack"><div class="radarfill" style="width:${Math.max(2,Math.min(100,r.score))}%"></div></div><div class="small">${Math.round(r.score)}</div></div>`);
+    localStorage.setItem('liqPrev_'+r.name,r.score);
+  });
+
+  const avgLiquidity=rankings.reduce((a,r)=>a+Number(r.score),0)/rankings.length;
+  const liquidityMomentum=Math.max(0,Math.min(100,Math.round(avgLiquidity+2*s.macroScore)));
+  const institutional=Math.max(0,Math.min(100,Math.round(55+s.etfScore*4+s.onchainScore)));
+  const risk=Math.max(0,Math.min(100,Math.round(52+s.sentimentScore*4+s.macroScore*2)));
+  const macro=Math.max(0,Math.min(100,Math.round(50+s.macroScore*5)));
+  const cycleConf=Math.max(30,Math.min(95,Math.round(confidence*0.65+Math.min(100,drawdown)*0.35)));
+  $('liquidityMomentum').textContent=liquidityMomentum+'/100';
+  $('liquidityMomentumText').textContent=liquidityMomentum>=70?'Strong positive':liquidityMomentum>=55?'Moderately positive':'Weak or defensive';
+  $('institutionalScore').textContent=institutional+'/100';
+  $('riskScore').textContent=risk+'/100';
+  $('macroTailwind').textContent=macro+'/100';
+  $('cycleConfidence').textContent=cycleConf+'/100';
+
+  const top=rankings.slice(0,3);
+  const weakest=rankings[rankings.length-1];
+  const btcRank=rankings.findIndex(r=>r.name.startsWith('Bitcoin'))+1;
+  $('smartMoneySummary').innerHTML=`<strong>Current model view:</strong> liquidity is favouring <strong>${top[0].name}</strong>, followed by <strong>${top[1].name}</strong> and <strong>${top[2].name}</strong>. Bitcoin ranks <strong>#${btcRank}</strong>. ${institutional>=65?'Institutional crypto demand is supportive.':'Institutional crypto demand is not yet strong enough to dominate the ranking.'} ${macro>=60?'Macro liquidity is providing a tailwind.':'Macro liquidity remains mixed or restrictive.'} The weakest of the tracked destinations is <strong>${weakest.name}</strong>.`;
+}
 function drawChart(vals){
   const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;
   ctx.clearRect(0,0,w,h); ctx.fillStyle='#0d1425';ctx.fillRect(0,0,w,h);
