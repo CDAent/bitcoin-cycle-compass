@@ -34,8 +34,15 @@ input{width:100%;margin-top:5px;padding:11px;border-radius:11px;border:1px solid
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}
 canvas{width:100%;height:210px;background:#0d1425;border-radius:14px;border:1px solid var(--line)}
 .notice{padding:11px 12px;border-radius:13px;background:#101a31;border:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.5}
+.scoregrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.scorebox{background:#0e1527;border:1px solid var(--line);border-radius:14px;padding:12px}
+.score{font-size:25px;font-weight:800;margin:4px 0}.rank{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.rank:last-child{border-bottom:0}.ranknum{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#23304f;font-weight:800}
+.rankbody{flex:1}.pill{font-size:11px;border:1px solid var(--line);padding:4px 7px;border-radius:999px;color:var(--muted)}
+.sourcegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sourceitem{padding:10px;background:#0e1527;border:1px solid var(--line);border-radius:12px;font-size:12px}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
 footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
-@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls{grid-template-columns:1fr}h1{font-size:24px}.value{font-size:25px}}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.card.wide{grid-column:auto}.controls,.scoregrid,.sourcegrid{grid-template-columns:1fr}h1{font-size:24px}.value{font-size:25px}}
 </style>
 </head>
 <body>
@@ -80,6 +87,45 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
     </table>
   </section>
 
+
+  <section class="card wide">
+    <div class="label">Compass AI research summary</div>
+    <div class="scoregrid">
+      <div class="scorebox"><div class="small">Cycle opportunity</div><div class="score" id="opportunityScore">—</div><div class="small" id="opportunityText">Calculating…</div></div>
+      <div class="scorebox"><div class="small">Bottom proximity</div><div class="score" id="bottomProbability">—</div><div class="small">Estimated probability of being within 15% of the next cycle low</div></div>
+      <div class="scorebox"><div class="small">Research confidence</div><div class="score" id="researchConfidence">—</div><div class="small">Falls when research inputs are stale or manual</div></div>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Top 3 estimated global liquidity destinations</div>
+    <div class="rank"><div class="ranknum">1</div><div class="rankbody"><strong id="liq1Name">Gold & precious metals</strong><div class="small" id="liq1Why">Central-bank demand, fiscal risk and geopolitical hedging</div></div><div class="pill" id="liq1Score">78/100</div></div>
+    <div class="rank"><div class="ranknum">2</div><div class="rankbody"><strong id="liq2Name">US large-cap & AI equities</strong><div class="small" id="liq2Why">Earnings concentration, capex and passive fund flows</div></div><div class="pill" id="liq2Score">73/100</div></div>
+    <div class="rank"><div class="ranknum">3</div><div class="rankbody"><strong id="liq3Name">Bitcoin & digital assets</strong><div class="small" id="liq3Why">ETF access, stablecoin liquidity and asymmetric cycle upside</div></div><div class="pill" id="liq3Score">66/100</div></div>
+    <div class="small" style="margin-top:9px">These rankings are model estimates based on the research sliders below. They are not direct measurements of every global capital flow.</div>
+  </section>
+
+  <section class="card wide">
+    <div class="label">Research engine inputs</div>
+    <div class="controls">
+      <label>Bitcoin ETF flow score (-10 to +10)<input id="etfScore" type="number" min="-10" max="10" value="1"></label>
+      <label>Macro liquidity score (-10 to +10)<input id="macroScore" type="number" min="-10" max="10" value="0"></label>
+      <label>On-chain score (-10 to +10)<input id="onchainScore" type="number" min="-10" max="10" value="-2"></label>
+      <label>Sentiment score (-10 to +10)<input id="sentimentScore" type="number" min="-10" max="10" value="-1"></label>
+      <label>Gold liquidity score (0 to 100)<input id="goldLiquidity" type="number" min="0" max="100" value="78"></label>
+      <label>Equity liquidity score (0 to 100)<input id="equityLiquidity" type="number" min="0" max="100" value="73"></label>
+      <label>Bitcoin liquidity score (0 to 100)<input id="bitcoinLiquidity" type="number" min="0" max="100" value="66"></label>
+      <label>Research updated date<input id="researchDate" type="date" value="2026-07-21"></label>
+    </div>
+    <div class="row"><button class="secondary" id="saveResearch">Save research inputs</button></div>
+    <div class="sourcegrid">
+      <div class="sourceitem"><strong>BTC price & FX</strong><br><span class="good">Live when API available</span></div>
+      <div class="sourceitem"><strong>ETF flows</strong><br><span class="warn">Manual research score</span></div>
+      <div class="sourceitem"><strong>Macro liquidity</strong><br><span class="warn">Manual research score</span></div>
+      <div class="sourceitem"><strong>On-chain metrics</strong><br><span class="warn">Manual research score</span></div>
+    </div>
+  </section>
+
   <section class="card wide">
     <div class="label">Historical diminishing returns</div>
     <canvas id="chart" width="860" height="240"></canvas>
@@ -108,12 +154,12 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
 </div>
 
 <footer>
-Price source: CoinGecko public API. AUD/USD is implied from the live AUD and USD Bitcoin quotes. The page refreshes automatically while open. For a Home Screen icon and full app-like behaviour, host these files on an HTTPS site such as GitHub Pages.
+Live price sources: CoinGecko, Coinbase and Kraken fallbacks. AUD/USD is implied from BTC quotes. Research scores are manually maintained and clearly labelled. The page refreshes automatically while open. For a Home Screen icon and full app-like behaviour, host these files on an HTTPS site such as GitHub Pages.
 </footer>
 </div>
 
 <script>
-const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556};
+const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556,etfScore:1,macroScore:0,onchainScore:-2,sentimentScore:-1,goldLiquidity:78,equityLiquidity:73,bitcoinLiquidity:66};
 let timer=null, lastData=null;
 const $=id=>document.getElementById(id);
 const fmtAUD=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n);
@@ -122,16 +168,18 @@ const fmtUSD=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',m
 function loadSettings(){
   const saved=JSON.parse(localStorage.getItem('btcCompassSettings')||'{}');
   const s={...defaults,...saved};
-  Object.keys(defaults).forEach(k=>$(k).value=s[k]);
+  Object.keys(defaults).forEach(k=>{if($(k)) $(k).value=s[k]});
+  const rd=localStorage.getItem('btcResearchDate'); if(rd) $('researchDate').value=rd;
   return s;
 }
 function getSettings(){
   const s={};
-  Object.keys(defaults).forEach(k=>s[k]=Number($(k).value));
+  Object.keys(defaults).forEach(k=>{if($(k)) s[k]=Number($(k).value)});
   return s;
 }
 function saveSettings(){
   localStorage.setItem('btcCompassSettings',JSON.stringify(getSettings()));
+  localStorage.setItem('btcResearchDate',$('researchDate').value);
   calculate(lastData); schedule();
 }
 function resetSettings(){
@@ -235,8 +283,30 @@ function calculate(d){
   $('cycleBar').style.width=progress+'%';
   $('cycleText').textContent=progress.toFixed(0)+'% through the assumed peak-to-bottom window';
   $('status').textContent=(d.source||'Data')+' • '+new Date(d.updated||Date.now()).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+  updateResearch(dd,s);
   drawChart([130,21.6,8.1,s.baseMultiple]);
 }
+
+function updateResearch(drawdown,s){
+  const researchRaw=s.etfScore+s.macroScore+s.onchainScore+s.sentimentScore;
+  const cycleComponent=Math.max(0,Math.min(55,drawdown*0.75));
+  const opportunity=Math.max(0,Math.min(100,Math.round(42+cycleComponent+researchRaw*1.3)));
+  const bottomProb=Math.max(5,Math.min(90,Math.round(18+drawdown*0.72-researchRaw*0.8)));
+  const rd=$('researchDate').value ? new Date($('researchDate').value+'T00:00:00') : new Date();
+  const ageDays=Math.max(0,Math.floor((Date.now()-rd.getTime())/86400000));
+  const confidence=Math.max(35,Math.min(90,78-ageDays*2));
+  $('opportunityScore').textContent=opportunity+'/100';
+  $('opportunityText').textContent=opportunity>=75?'Strong accumulation zone':opportunity>=58?'Gradual accumulation zone':'Wait and monitor';
+  $('bottomProbability').textContent=bottomProb+'%';
+  $('researchConfidence').textContent=confidence+'%';
+  const rankings=[
+    {name:'Gold & precious metals',score:s.goldLiquidity,why:'Central-bank demand, fiscal risk and geopolitical hedging'},
+    {name:'US large-cap & AI equities',score:s.equityLiquidity,why:'Earnings concentration, capex and passive fund flows'},
+    {name:'Bitcoin & digital assets',score:s.bitcoinLiquidity,why:'ETF access, stablecoin liquidity and asymmetric cycle upside'}
+  ].sort((a,b)=>b.score-a.score);
+  rankings.forEach((r,i)=>{const n=i+1;$('liq'+n+'Name').textContent=r.name;$('liq'+n+'Why').textContent=r.why;$('liq'+n+'Score').textContent=Math.round(r.score)+'/100'});
+}
+
 function drawChart(vals){
   const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;
   ctx.clearRect(0,0,w,h); ctx.fillStyle='#0d1425';ctx.fillRect(0,0,w,h);
@@ -256,7 +326,7 @@ function schedule(){
   const mins=Math.max(5,getSettings().refreshMinutes||15);
   timer=setInterval(fetchData,mins*60000);
 }
-$('refresh').onclick=fetchData;$('saveSettings').onclick=saveSettings;$('useManual').onclick=useManualPrices;$('resetSettings').onclick=resetSettings;
+$('refresh').onclick=fetchData;$('saveSettings').onclick=saveSettings;$('saveResearch').onclick=saveSettings;$('useManual').onclick=useManualPrices;$('resetSettings').onclick=resetSettings;
 loadSettings();fetchData();schedule();
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./service-worker.js').catch(()=>{});}
 </script>

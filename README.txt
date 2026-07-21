@@ -1,22 +1,13 @@
-BITCOIN CYCLE COMPASS - UPDATED
+BITCOIN CYCLE COMPASS V3
 
-WHY DATA MAY NOT LOAD ON IPHONE
-The iPhone Files preview uses a restricted Quick Look viewer. It can block JavaScript and live web requests. This is an iOS limitation rather than a fault in the calculations.
+Upload index.html, manifest.json and service-worker.js directly to the root of your GitHub repository. GitHub Pages must publish from main / root.
 
-BEST METHOD FOR AUTOMATIC LIVE DATA
-Host the four files on an HTTPS website, then open the site in Safari. GitHub Pages is free:
-1. Create a public GitHub repository.
-2. Upload index.html, manifest.json and service-worker.js.
-3. Open Settings > Pages and publish from the main branch.
-4. Open the resulting web address in Safari.
-5. Tap Share > Add to Home Screen.
+The dashboard provides:
+- Live BTC AUD and USD prices with multiple fallbacks
+- Cycle drawdown and bottom/peak estimates
+- Compass AI opportunity and bottom-proximity scores
+- Top-three global liquidity destination ranking
+- Editable ETF, macro, on-chain, sentiment and liquidity research inputs
+- Clear distinction between live market data and manually maintained research assumptions
 
-UPDATED FEATURES
-- Tries CoinGecko first, then Coinbase, then Kraken.
-- Shows which data source worked.
-- Uses the last saved price if live sources fail.
-- Includes manual BTC AUD and USD price fields as a fallback.
-- Refreshes automatically every 15 minutes while open and hosted.
-
-IMPORTANT
-Future bottom and peak ranges are estimates based on editable assumptions, not certainties or financial advice.
+After uploading a new version, refresh the GitHub Pages site twice or close and reopen the Home Screen app. The service worker may retain the previous version briefly.

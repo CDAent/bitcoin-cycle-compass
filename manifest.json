@@ -1,9 +1,1 @@
-{
-  "name": "Bitcoin Cycle Compass",
-  "short_name": "BTC Compass",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#0b1020",
-  "theme_color": "#111827",
-  "icons": []
-}
+{"name":"Bitcoin Cycle Compass","short_name":"BTC Compass","start_url":"./index.html","display":"standalone","background_color":"#0b1020","theme_color":"#111827"}
