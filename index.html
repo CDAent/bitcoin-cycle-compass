@@ -41,6 +41,8 @@ canvas{width:100%;height:210px;background:#0d1425;border-radius:14px;border:1px 
 .rankbody{flex:1}.pill{font-size:11px;border:1px solid var(--line);padding:4px 7px;border-radius:999px;color:var(--muted)}
 .sourcegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sourceitem{padding:10px;background:#0e1527;border:1px solid var(--line);border-radius:12px;font-size:12px}
 .good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.positive-move{color:var(--good)!important}.negative-move{color:var(--bad)!important}.neutral-move{color:var(--muted)!important}
+.move{display:block;font-size:12px;font-weight:750;margin-top:3px}
 .trend{font-size:18px;font-weight:800;min-width:28px;text-align:center}.radar{display:grid;gap:9px;margin-top:10px}.radarrow{display:grid;grid-template-columns:145px 1fr 42px;gap:9px;align-items:center}.radartrack{height:11px;border-radius:9px;background:#252f4a;overflow:hidden}.radarfill{height:100%;background:linear-gradient(90deg,#7fa9ff,#47d18c);border-radius:9px}.summarybox{margin-top:10px;padding:13px;background:#0e1527;border:1px solid var(--line);border-radius:14px;line-height:1.55}.metricgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.metric{background:#0e1527;border:1px solid var(--line);border-radius:13px;padding:10px;text-align:center}.metric strong{display:block;font-size:21px;margin:4px 0}
 .snapshotgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
 footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
@@ -94,9 +96,9 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
   <section class="card wide">
     <div class="label">Reliable market snapshot</div>
     <div class="metricgrid snapshotgrid">
-      <div class="metric"><span class="small">Fear & Greed</span><strong id="fearGreed">—</strong><span class="small" id="fearGreedText">Checking live feed</span></div>
-      <div class="metric"><span class="small">ETF flow signal</span><strong id="etfSignal">—</strong><span class="small">Research input</span></div>
-      <div class="metric"><span class="small">Stablecoin liquidity</span><strong id="stablecoinSignal">—</strong><span class="small" id="stablecoinText">Checking live feed</span></div>
+      <div class="metric"><span class="small">Fear & Greed</span><strong id="fearGreed">—</strong><span class="small" id="fearGreedText">Checking live feed</span><span class="move neutral-move" id="fearGreedMove">24h change unavailable</span></div>
+      <div class="metric"><span class="small">ETF flow signal</span><strong id="etfSignal">—</strong><span class="small">Research input</span><span class="move neutral-move" id="etfMove">Daily directional score</span></div>
+      <div class="metric"><span class="small">Stablecoin liquidity</span><strong id="stablecoinSignal">—</strong><span class="small" id="stablecoinText">Checking live feed</span><span class="move neutral-move" id="stablecoinMove">24h change unavailable</span></div>
       <div class="metric"><span class="small">Snapshot freshness</span><strong id="snapshotFreshness">—</strong><span class="small" id="snapshotFreshnessText">Price + research status</span></div>
     </div>
   </section>
@@ -104,9 +106,9 @@ footer{margin-top:16px;color:var(--muted);font-size:11px;line-height:1.45}
   <section class="card wide">
     <div class="label">Compass AI research summary</div>
     <div class="scoregrid">
-      <div class="scorebox"><div class="small">Cycle opportunity</div><div class="score" id="opportunityScore">—</div><div class="small" id="opportunityText">Calculating…</div></div>
-      <div class="scorebox"><div class="small">Bottom proximity</div><div class="score" id="bottomProbability">—</div><div class="small">Estimated probability of being within 15% of the next cycle low</div></div>
-      <div class="scorebox"><div class="small">Research confidence</div><div class="score" id="researchConfidence">—</div><div class="small">Falls when research inputs are stale or manual</div></div>
+      <div class="scorebox"><div class="small">Cycle opportunity</div><div class="score" id="opportunityScore">—</div><div class="small" id="opportunityText">Calculating…</div><span class="move neutral-move" id="opportunityMove">Building 24h history</span></div>
+      <div class="scorebox"><div class="small">Bottom proximity</div><div class="score" id="bottomProbability">—</div><div class="small">Estimated probability of being within 15% of the next cycle low</div><span class="move neutral-move" id="bottomProbabilityMove">Building 24h history</span></div>
+      <div class="scorebox"><div class="small">Research confidence</div><div class="score" id="researchConfidence">—</div><div class="small">Falls when research inputs are stale or manual</div><span class="move neutral-move" id="researchConfidenceMove">Building 24h history</span></div>
     </div>
   </section>
 
@@ -197,10 +199,39 @@ Live price sources: CoinGecko, Coinbase and Kraken fallbacks. AUD/USD is implied
 
 <script>
 const defaults={cycleHighUsd:126200,bottomDrawdown:66,bearMultiple:3,baseMultiple:4.2,bullMultiple:5.5,refreshMinutes:15,manualAud:92200,manualUsd:64556,etfScore:1,macroScore:0,onchainScore:-2,sentimentScore:-1,stablecoinScore:1,goldLiquidity:78,equityLiquidity:73,bitcoinLiquidity:66,silverLiquidity:64,emergingLiquidity:61};
-let timer=null, lastData=null, researchLive={fear:null,fearLabel:null,stablecoinChange:null};
+let timer=null, lastData=null, researchLive={fear:null,fearLabel:null,fear24h:null,stablecoinChange:null,stablecoin24h:null};
 const $=id=>document.getElementById(id);
 const fmtAUD=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n);
 const fmtUSD=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+function setMove(id,value,suffix='',positiveIsGood=true){
+  const el=$(id); if(!el) return;
+  el.classList.remove('positive-move','negative-move','neutral-move');
+  if(value===null || value===undefined || Number.isNaN(Number(value))){el.textContent='24h change unavailable';el.classList.add('neutral-move');return;}
+  const n=Number(value), positive=positiveIsGood?n>0:n<0, negative=positiveIsGood?n<0:n>0;
+  el.textContent=(n>0?'+':'')+n.toFixed(1)+suffix+' over 24h';
+  el.classList.add(positive?'positive-move':negative?'negative-move':'neutral-move');
+}
+function colourValue(id,value,positiveIsGood=true){
+  const el=$(id); if(!el) return;
+  el.classList.remove('positive-move','negative-move','neutral-move');
+  const n=Number(value);
+  if(!Number.isFinite(n)||n===0) el.classList.add('neutral-move');
+  else el.classList.add((positiveIsGood?n>0:n<0)?'positive-move':'negative-move');
+}
+function get24hResearchBaseline(){
+  const history=JSON.parse(localStorage.getItem('btcResearchHistory')||'[]');
+  const target=Date.now()-24*3600000;
+  const candidates=history.filter(x=>x.ts<=Date.now()-20*3600000);
+  if(!candidates.length) return null;
+  return candidates.reduce((best,x)=>Math.abs(x.ts-target)<Math.abs(best.ts-target)?x:best,candidates[0]);
+}
+function saveResearchHistory(snapshot){
+  let history=JSON.parse(localStorage.getItem('btcResearchHistory')||'[]');
+  history.push({...snapshot,ts:Date.now()});
+  history=history.filter(x=>x.ts>Date.now()-7*86400000).slice(-200);
+  localStorage.setItem('btcResearchHistory',JSON.stringify(history));
+}
+
 
 function loadSettings(){
   const saved=JSON.parse(localStorage.getItem('btcCompassSettings')||'{}');
@@ -232,26 +263,29 @@ async function fetchJSON(url, timeoutMs=9000){
   } finally { clearTimeout(t); }
 }
 async function fetchResearchSnapshot(){
-  researchLive={fear:null,fearLabel:null,stablecoinChange:null};
+  researchLive={fear:null,fearLabel:null,fear24h:null,stablecoinChange:null,stablecoin24h:null};
   try{
     const f=await fetchJSON('https://api.alternative.me/fng/?limit=8&format=json',7000);
     const rows=f.data||[];
     if(rows.length){
       researchLive.fear=Number(rows[0].value);
       researchLive.fearLabel=rows[0].value_classification||'';
+      if(rows[1]) researchLive.fear24h=Number(rows[0].value)-Number(rows[1].value);
       $('fearSource').textContent='Live public feed'; $('fearSource').className='good';
     }
   }catch(e){ $('fearSource').textContent='Manual fallback active'; $('fearSource').className='warn'; }
   try{
     const st=await fetchJSON('https://stablecoins.llama.fi/stablecoins?includePrices=true',8000);
     const assets=st.peggedAssets||[];
-    let now=0,week=0;
+    let now=0,week=0,day=0;
     assets.forEach(a=>{
       now+=Number(a.circulating?.peggedUSD||0);
       week+=Number(a.circulatingPrevWeek?.peggedUSD||0);
+      day+=Number(a.circulatingPrevDay?.peggedUSD||0);
     });
     if(now>0 && week>0){
       researchLive.stablecoinChange=(now/week-1)*100;
+      if(day>0) researchLive.stablecoin24h=(now/day-1)*100;
       $('stableSource').textContent='Live public feed'; $('stableSource').className='good';
     }
   }catch(e){ $('stableSource').textContent='Manual fallback active'; $('stableSource').className='warn'; }
@@ -264,9 +298,9 @@ async function fetchData(){
   const errors=[];
   try{
     try{
-      const j=await fetchJSON('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=aud,usd&include_last_updated_at=true');
+      const j=await fetchJSON('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=aud,usd&include_last_updated_at=true&include_24hr_change=true');
       if(!j.bitcoin?.aud || !j.bitcoin?.usd) throw new Error('Incomplete response');
-      lastData={aud:Number(j.bitcoin.aud),usd:Number(j.bitcoin.usd),updated:(j.bitcoin.last_updated_at||Date.now()/1000)*1000,source:'CoinGecko'};
+      lastData={aud:Number(j.bitcoin.aud),usd:Number(j.bitcoin.usd),change24h:Number(j.bitcoin.usd_24h_change),updated:(j.bitcoin.last_updated_at||Date.now()/1000)*1000,source:'CoinGecko'};
     }catch(e){
       errors.push('CoinGecko: '+e.message);
       try{
@@ -329,7 +363,9 @@ function calculate(d){
   const bullPeak=baseBottom*s.bullMultiple;
 
   $('btcAud').textContent=fmtAUD(d.aud);
-  $('btcUsd').textContent=fmtUSD(d.usd)+' • AUD/USD implied '+(1/usdAud).toFixed(3);
+  $('btcUsd').textContent=fmtUSD(d.usd)+' • AUD/USD implied '+(1/usdAud).toFixed(3)+(Number.isFinite(d.change24h)?' • '+(d.change24h>=0?'+':'')+d.change24h.toFixed(1)+'% (24h)':'');
+  colourValue('btcAud',d.change24h,true);
+  if(Number.isFinite(d.change24h)) $('btcUsd').className='small '+(d.change24h>0?'positive-move':d.change24h<0?'negative-move':'neutral-move');
   $('drawdown').textContent=(dd>=0?'-':'')+Math.abs(dd).toFixed(1)+'%';
   $('peakAud').textContent='Assumed cycle high ≈ '+fmtAUD(peakAud);
   $('bottomRange').textContent=fmtAUD(low)+'–'+fmtAUD(high);
@@ -365,11 +401,33 @@ function updateResearch(drawdown,s){
   $('opportunityText').textContent=opportunity>=75?'Strong accumulation zone':opportunity>=58?'Gradual accumulation zone':'Wait and monitor';
   $('bottomProbability').textContent=bottomProb+'%';
   $('researchConfidence').textContent=confidence+'%';
+  const baseline=get24hResearchBaseline();
+  if(baseline){
+    setMove('opportunityMove',opportunity-baseline.opportunity,' points',true);
+    setMove('bottomProbabilityMove',bottomProb-baseline.bottomProb,' points',false);
+    setMove('researchConfidenceMove',confidence-baseline.confidence,' points',true);
+    colourValue('opportunityScore',opportunity-baseline.opportunity,true);
+    colourValue('bottomProbability',bottomProb-baseline.bottomProb,false);
+    colourValue('researchConfidence',confidence-baseline.confidence,true);
+  }
+  const lastSaved=Number(localStorage.getItem('btcResearchHistoryLast')||0);
+  if(Date.now()-lastSaved>30*60000){
+    saveResearchHistory({opportunity,bottomProb,confidence});
+    localStorage.setItem('btcResearchHistoryLast',String(Date.now()));
+  }
   $('fearGreed').textContent=researchLive.fear===null?'Manual':Math.round(researchLive.fear)+'/100';
   $('fearGreedText').textContent=researchLive.fear===null?'Fallback score '+s.sentimentScore:(researchLive.fearLabel||'Live sentiment');
   $('etfSignal').textContent=(s.etfScore>0?'+':'')+s.etfScore;
   $('stablecoinSignal').textContent=researchLive.stablecoinChange===null?'Manual':(researchLive.stablecoinChange>=0?'+':'')+researchLive.stablecoinChange.toFixed(1)+'%';
   $('stablecoinText').textContent=researchLive.stablecoinChange===null?'Fallback score '+s.stablecoinScore:'7-day supply change';
+  setMove('fearGreedMove',researchLive.fear24h,' points',true);
+  setMove('stablecoinMove',researchLive.stablecoin24h,'%',true);
+  const etfMove=$('etfMove');
+  etfMove.textContent=(s.etfScore>0?'+':'')+s.etfScore+' daily signal';
+  etfMove.className='move '+(s.etfScore>0?'positive-move':s.etfScore<0?'negative-move':'neutral-move');
+  colourValue('fearGreed',researchLive.fear24h,true);
+  colourValue('etfSignal',s.etfScore,true);
+  colourValue('stablecoinSignal',researchLive.stablecoin24h===null?s.stablecoinScore:researchLive.stablecoin24h,true);
   const liveCount=(researchLive.fear!==null?1:0)+(researchLive.stablecoinChange!==null?1:0)+1;
   const freshScore=Math.max(35,Math.min(100,Math.round(confidence*.65+liveCount*10)));
   $('snapshotFreshness').textContent=freshScore+'%';
@@ -410,7 +468,7 @@ function updateResearch(drawdown,s){
   const top=rankings.slice(0,3);
   const weakest=rankings[rankings.length-1];
   const btcRank=rankings.findIndex(r=>r.name.startsWith('Bitcoin'))+1;
-  $('smartMoneySummary').innerHTML=`<strong>Current model view:</strong> liquidity is favouring <strong>${top[0].name}</strong>, followed by <strong>${top[1].name}</strong> and <strong>${top[2].name}</strong>. Bitcoin ranks <strong>#${btcRank}</strong>. ${institutional>=65?'Institutional crypto demand is supportive.':'Institutional crypto demand is not yet strong enough to dominate the ranking.'} ${macro>=60?'Macro liquidity is providing a tailwind.':'Macro liquidity remains mixed or restrictive.'} The weakest of the tracked destinations is <strong>${weakest.name}</strong>.`;
+  $('smartMoneySummary').innerHTML=`<strong>Current model view:</strong> liquidity is favouring <strong class="positive-move">${top[0].name}</strong>, followed by <strong>${top[1].name}</strong> and <strong>${top[2].name}</strong>. Bitcoin ranks <strong>#${btcRank}</strong>. <span class="${institutional>=65?'positive-move':'negative-move'}">${institutional>=65?'Institutional crypto demand is supportive.':'Institutional crypto demand is not yet strong enough to dominate the ranking.'}</span> <span class="${macro>=60?'positive-move':'negative-move'}">${macro>=60?'Macro liquidity is providing a tailwind.':'Macro liquidity remains mixed or restrictive.'}</span> The weakest of the tracked destinations is <strong class="negative-move">${weakest.name}</strong>.`;
 }
 function drawChart(vals){
   const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;

@@ -26,3 +26,9 @@ Upload index.html, manifest.json, service-worker.js and README.txt to the reposi
 
 IMPORTANT
 Forecasts are estimates, not certainties or financial advice.
+
+24-HOUR COLOUR UPDATE
+- Positive 24-hour moves are shown in green.
+- Negative 24-hour moves are shown in red.
+- Neutral or unavailable changes remain grey.
+- The research summary builds a local 24-hour comparison history after the dashboard has been used for at least one day.
