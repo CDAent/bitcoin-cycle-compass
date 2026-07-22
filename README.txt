@@ -110,3 +110,12 @@ VERSION 8.2 HISTORY AND MARKET INTELLIGENCE
 - Article metadata order is source, time, then star rating.
 - Stars measure estimated global financial significance, not article quality.
 - Added impact score, directional tag, affected-market tags and “Why this matters”.
+
+
+VERSION 8.2.1 MARKET INTELLIGENCE DISPLAY REFINEMENT
+- Increased market-significance star size for easier scanning.
+- Added plain-language significance labels beside the stars.
+- Removed the visible numeric importance/impact score.
+- Removed the Watchlist label.
+- Direction labels now appear only when classified as Bullish, Bearish or Neutral.
+- The full article card remains the link to the source.

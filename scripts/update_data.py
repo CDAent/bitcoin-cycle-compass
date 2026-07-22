@@ -206,7 +206,7 @@ def weekly_btc_history():
     return rows[-208:]
 
 def article_significance(title, source=''):
-    t=(title or '').lower();score=18;tags=[];impact='Watchlist';why='This story may affect market expectations, but its broader financial impact has not yet been confirmed.'
+    t=(title or '').lower();score=18;tags=[];impact='';why='This story may affect market expectations, but its broader financial impact has not yet been confirmed.'
     rules=[
       (['federal reserve','fed rate','fomc','ecb','rba','bank of japan','interest rate decision'],38,['Macro','Bonds','Global Liquidity'],'Central-bank policy can alter borrowing costs, currencies, bond yields and global liquidity.'),
       (['inflation','cpi','pce','jobs report','payrolls','gdp','recession'],30,['Macro','Bonds','Equities'],'Major economic data can change interest-rate expectations and risk-asset pricing.'),
@@ -226,7 +226,7 @@ def article_significance(title, source=''):
     bearish=['raises rates','rate hike','outflows','ban','recession','default','war','attack','inflation rises','inflation surges']
     if any(x in t for x in bullish):impact='Bullish'
     elif any(x in t for x in bearish):impact='Bearish'
-    elif score>=65:impact='Watchlist'
+    elif score>=65:impact=''
     else:impact='Neutral'
     return {'impactScore':score,'stars':stars,'impact':impact,'tags':list(dict.fromkeys(tags))[:4],'why':why}
 
