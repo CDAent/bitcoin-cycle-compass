@@ -98,5 +98,17 @@
       "url": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
     }
   ],
-  "appVersion": "7.4"
+  "appVersion": "7.5",
+  "liquidityTrends": {
+    "Cash & short-term bills": 0.0,
+    "Government bonds & fixed income": 0.0,
+    "Global equities": 0.0,
+    "AI technology": 0.0,
+    "Emerging markets": 0.0,
+    "Bitcoin": 0.0,
+    "Stablecoins": 0.0,
+    "Gold": 0.0,
+    "Silver": 0.0,
+    "Other": 0.0
+  }
 }

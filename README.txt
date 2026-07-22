@@ -59,3 +59,11 @@ VERSION 7.4 LOGO AND DATA REBUILD
 - Preserves the capital-allocation categories, descending sorting and colour-coded trend arrows.
 - Preserves the centred needle pivot and refresh animation.
 - Updates the app version, manifest, service-worker cache and live-data version marker.
+
+
+VERSION 7.5 TREND COLOUR UPDATE
+- Green = increasing, amber = no material change, red = declining.
+- Global Capital Allocation percentage badges and arrows now use actual trend data.
+- Global Liquidity detail page now shows trend arrows and labels.
+- Added liquidityTrends to scheduled and browser-fallback data.
+- Fixed the undefined stable_change updater reference.

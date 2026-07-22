@@ -258,11 +258,23 @@ def main():
       'AI technology':round(clamp(54+proxies['ai'].get('change20d',0)*3.5+risk_score*0.17+(sentiment-50)*0.20)),
       'Emerging markets':round(clamp(49+proxies['emerging'].get('change20d',0)*3+(risk_score-50)*0.16)),
       'Bitcoin':btc_score,
-      'Stablecoins':round(clamp(55+(stable_change*4)+(50-sentiment)*0.10)),
+      'Stablecoins':round(clamp(55+(float(st.get('change7d') or 0)*4)+(50-sentiment)*0.10)),
       'Gold':round(clamp(55+proxies['gold'].get('change20d',0)*3+(100-risk_score)*0.12)),
       'Silver':round(clamp(51+proxies['silver'].get('change20d',0)*3+proxies['gold'].get('change20d',0)*0.8)),
     }
+    trends={
+      'Cash & short-term bills':float(proxies['cash'].get('change20d',0) or 0),
+      'Government bonds & fixed income':float(proxies['bonds'].get('change20d',0) or 0),
+      'Global equities':float(proxies['equities'].get('change20d',0) or 0),
+      'AI technology':float(proxies['ai'].get('change20d',0) or 0),
+      'Emerging markets':float(proxies['emerging'].get('change20d',0) or 0),
+      'Bitcoin':float(btc24 or 0),
+      'Stablecoins':float(st.get('change7d') or 0),
+      'Gold':float(proxies['gold'].get('change20d',0) or 0),
+      'Silver':float(proxies['silver'].get('change20d',0) or 0),
+      'Other':0,
+    }
     live_news=safe(news,[]) or previous.get('news',[]) or []
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'proxies':proxies,'news':live_news,'events':events()}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'proxies':proxies,'news':live_news,'events':events()}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
