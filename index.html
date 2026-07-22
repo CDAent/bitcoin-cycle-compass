@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#06101b">
 <link rel="manifest" href="manifest.json">
-<title>Bitcoin Cycle Compass v8.1</title>
+<title>Bitcoin Cycle Compass v8.4.0-dev</title>
 <style>
 :root{--bg:#040b13;--sidebar:#050c14;--panel:#07121d;--panel2:#091724;--line:#1d3445;--text:#eef5fb;--muted:#91a0ad;--green:#43d13b;--amber:#ffb300;--red:#ff3b3b;--blue:#1da1f2;--gold:#f5a800}
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0,#0b1c2b 0,#040b13 46%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}button{font:inherit}
@@ -142,7 +142,7 @@ button:active{transform:translateY(0)}
     <button class="nav-item" data-view="settings"><span>⚙</span>Settings</button>
     <button class="nav-item" data-view="about"><span>ⓘ</span>About &amp; Glossary</button>
   </nav>
-  <div class="side-bottom"><button class="side-refresh" id="sideRefresh">↻ Refresh live data</button><strong>Version 8.3.1</strong><span class="side-stamp" id="sideTimestamp">Last updated: —</span></div>
+  <div class="side-bottom"><button class="side-refresh" id="sideRefresh">↻ Refresh live data</button><strong id="sideVersion">Version 8.4.0-dev</strong><span class="side-stamp" id="sideTimestamp">Last updated: —</span></div>
 </aside>
 <main class="main">
   <div class="topbar"><div class="title">BITCOIN CYCLE COMPASS</div><div class="toptools"><span class="currency-label">CURRENCY</span><div class="toggle"><button id="audBtn" class="currency-btn active" data-currency="AUD">AUD</button><button id="usdBtn" class="currency-btn" data-currency="USD">USD</button></div><div class="live-dot"></div></div></div>
@@ -165,7 +165,7 @@ button:active{transform:translateY(0)}
     <section class="card c-events" data-open="news"><h3>MAJOR MARKET EVENTS (RECENT & UPCOMING)</h3><div class="events" id="eventsList"></div></section>
     <section class="card c-news" data-open="news"><h3>MARKET NEWS &amp; EVENTS</h3><div class="news-list" id="newsList"></div></section>
   </div>
-  <div class="footer"><span id="footerStatus">● Live data. Multiple sources.</span><span>Snapshot auto-refreshes every 15 minutes while active</span><span class="footer-version">Version 8.3.1</span></div>
+  <div class="footer"><span id="footerStatus">● Live data. Multiple sources.</span><span>Snapshot auto-refreshes every 15 minutes while active</span><span class="footer-version" id="footerVersion">Version 8.4.0-dev</span></div>
 
   <section id="detailPanel" class="detail-panel" hidden aria-live="polite">
     <div class="detail-head"><div><div class="detail-kicker">BITCOIN CYCLE COMPASS</div><h2 id="detailTitle">Details</h2></div><div class="detail-head-actions"><div class="toggle detail-currency" id="detailCurrency"><button class="currency-btn" data-currency="AUD">AUD</button><button class="currency-btn" data-currency="USD">USD</button></div><button id="detailClose" class="detail-close" aria-label="Close details">×</button></div></div>
@@ -443,7 +443,7 @@ function render(){
  const news=sortedNews(d.news||[]);$('newsList').innerHTML=news.slice(0,5).map(n=>`<div class="news-item"><span class="muted">${relativeTime(n.date)||'Live'} • <span class="market-stars" title="${starLabel(n.stars)}">${starText(n.stars)}</span><span>${starLabel(n.stars)}</span></span><a href="${safeUrl(n.url)}" target="_blank" rel="noopener">${escapeHtml(n.title)}</a></div>`).join('')||'<div class="small">Headlines will appear after the next GitHub Action refresh.</div>';
  const events=d.events||[];$('eventsList').innerHTML=events.slice(0,4).map((n,i)=>`<div class="event"><a href="${safeUrl(n.url)}" target="_blank" rel="noopener"><span class="event-tag">${escapeHtml(n.tag||'UPCOMING')}</span><div class="event-title">${escapeHtml(n.title)}</div><div class="small">${escapeHtml(n.source||'Official calendar')}</div><div class="small" style="margin-top:10px">Open details ↗</div></a></div>`).join('')||news.slice(0,4).map(n=>`<div class="event"><a href="${safeUrl(n.url)}" target="_blank" rel="noopener"><span class="event-tag">RECENT</span><div class="event-title">${escapeHtml(n.title)}</div><div class="small">${escapeHtml(n.source||'Market news')}</div></a></div>`).join('')||'<div class="small">Events will appear after the next update.</div>';
  saveSnapshot(d,research,regimeScore,bottomProb,peakProb);
- const stamp=new Date(d.generatedAt);const text=stamp.toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});$('sideTimestamp').textContent='Last updated: '+text;$('priceUpdated').textContent='Updated: '+stamp.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});$('footerStatus').textContent='● '+(d.status||'Live data. Multiple sources.');
+ const stamp=new Date(d.generatedAt);const text=stamp.toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});$('sideTimestamp').textContent='Last updated: '+text;$('priceUpdated').textContent='Updated: '+stamp.toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});$('footerStatus').textContent='● '+(d.status||'Live data. Multiple sources.');const liveVersion=(d.buildMeta&&d.buildMeta.appVersion)||d.appVersion||'8.4.0-dev';if($('sideVersion'))$('sideVersion').textContent='Version '+liveVersion;if($('footerVersion'))$('footerVersion').textContent='Version '+liveVersion;document.title='Bitcoin Cycle Compass v'+liveVersion;
 }
 async function getJson(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error(r.status);return r.json()}
 const FALLBACK_EVENTS=[

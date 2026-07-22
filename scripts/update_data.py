@@ -622,6 +622,6 @@ def main():
         'buildDate':now_utc if _DB_AVAILABLE else datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'databaseVersion':'2','lastSuccessfulUpdate':now_utc if btc else 'partial',
     }
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
