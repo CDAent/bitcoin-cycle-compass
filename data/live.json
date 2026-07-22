@@ -47,11 +47,15 @@
     "metrics": {}
   },
   "liquidityScores": {
-    "Bitcoin & digital assets": 50,
-    "Gold & precious metals": 61,
-    "US AI & technology equities": 62,
-    "Silver": 52,
-    "Emerging markets": 50
+    "Cash & short-term bills": 58,
+    "Government bonds & fixed income": 52,
+    "Global equities": 60,
+    "AI technology": 63,
+    "Emerging markets": 49,
+    "Bitcoin": 57,
+    "Stablecoins": 54,
+    "Gold": 61,
+    "Silver": 52
   },
   "proxies": {
     "gold": {
@@ -93,5 +97,6 @@
       "source": "CME FedWatch",
       "url": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
     }
-  ]
+  ],
+  "appVersion": "7.4"
 }

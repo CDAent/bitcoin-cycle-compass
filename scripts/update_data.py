@@ -246,16 +246,21 @@ def main():
         if etf.get('score') in (None,50): etf['score']=market_score
 
     proxies={}
-    for name,sym in [('gold','gld.us'),('equities','qqq.us'),('silver','slv.us'),('emerging','eem.us')]:
+    for name,sym in [('gold','gld.us'),('silver','slv.us'),('equities','spy.us'),('ai','qqq.us'),('emerging','eem.us'),('bonds','tlt.us'),('cash','bil.us')]:
         proxies[name]=safe(lambda sym=sym:stooq(sym),previous.get('proxies',{}).get(name,{'change20d':0}))
     sentiment=round(clamp(float(fg.get('value',50))))
     btc_score=round(clamp(0.22*float(etf.get('score',50))+0.20*float(ma.get('score',50))+0.18*float(ch.get('score',50))+0.20*sentiment+0.20*clamp(50+float(st.get('change7d') or 0)*8)))
+    risk_score=float(ma.get('score',50))
     scores={
-      'Bitcoin & digital assets':btc_score,
-      'Gold & precious metals':round(clamp(55+proxies['gold'].get('change20d',0)*3+(100-float(ma.get('score',50)))*0.12)),
-      'US AI & technology equities':round(clamp(55+proxies['equities'].get('change20d',0)*3+float(ma.get('score',50))*0.15)),
-      'Silver':round(clamp(52+proxies['silver'].get('change20d',0)*3+proxies['gold'].get('change20d',0))),
-      'Emerging markets':round(clamp(50+proxies['emerging'].get('change20d',0)*3+(float(ma.get('score',50))-50)*0.2)),
+      'Cash & short-term bills':round(clamp(58+proxies['cash'].get('change20d',0)*4+(50-sentiment)*0.30+(50-risk_score)*0.18)),
+      'Government bonds & fixed income':round(clamp(52+proxies['bonds'].get('change20d',0)*4+(50-sentiment)*0.18+(50-risk_score)*0.12)),
+      'Global equities':round(clamp(53+proxies['equities'].get('change20d',0)*3+risk_score*0.15+(sentiment-50)*0.18)),
+      'AI technology':round(clamp(54+proxies['ai'].get('change20d',0)*3.5+risk_score*0.17+(sentiment-50)*0.20)),
+      'Emerging markets':round(clamp(49+proxies['emerging'].get('change20d',0)*3+(risk_score-50)*0.16)),
+      'Bitcoin':btc_score,
+      'Stablecoins':round(clamp(55+(stable_change*4)+(50-sentiment)*0.10)),
+      'Gold':round(clamp(55+proxies['gold'].get('change20d',0)*3+(100-risk_score)*0.12)),
+      'Silver':round(clamp(51+proxies['silver'].get('change20d',0)*3+proxies['gold'].get('change20d',0)*0.8)),
     }
     live_news=safe(news,[]) or previous.get('news',[]) or []
     out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'proxies':proxies,'news':live_news,'events':events()}

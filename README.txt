@@ -32,3 +32,30 @@ VERSION 7.1 DISPLAY UPDATE
 - Compass AI Research now uses a horizontal Weak-to-Confident meter.
 - Fear & Greed colour bands now follow balanced index categories:
   Extreme Fear 0-24, Fear 25-44, Neutral 45-54, Greed 55-74, Extreme Greed 75-100.
+
+
+VERSION 7.2 LIQUIDITY AND SENTIMENT UPDATE
+- Fear & Greed colours now use:
+  0-24 dark red, 25-44 red, 45-54 yellow, 55-74 green, 75-100 dark green.
+- Global Liquidity Estimates now use seven primary categories plus Other:
+  Cash & short-term bills; Government bonds & fixed income; Global equities;
+  Bitcoin & digital assets; Gold & precious metals; Broad commodities;
+  Real estate & REITs; and Other.
+- The eight displayed percentages total 100%.
+- These remain modelled relative liquidity signals, not audited market-size statistics.
+
+
+VERSION 7.3 DASHBOARD REORGANISATION
+- BTC Live Price is now the first/top dashboard widget.
+- Global Capital Allocation contains nine named destinations plus Other.
+- Allocation rows re-sort from highest percentage to lowest on every refresh.
+- Trend arrows are green for rising, amber for neutral and red for falling.
+- Risk Appetite remains only in Today's Snapshot and is not duplicated.
+
+
+VERSION 7.4 LOGO AND DATA REBUILD
+- Rebuilt from the previous capital-allocation release.
+- Uses only bitcoin-compass-base.png and bitcoin-compass-needle.png for the animated dashboard logo.
+- Preserves the capital-allocation categories, descending sorting and colour-coded trend arrows.
+- Preserves the centred needle pivot and refresh animation.
+- Updates the app version, manifest, service-worker cache and live-data version marker.
