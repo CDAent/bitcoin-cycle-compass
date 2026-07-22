@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import csv, io, json, math, re, statistics, urllib.parse, urllib.request, xml.etree.ElementTree as ET
+import csv, io, json, math, re, statistics, sys, urllib.parse, urllib.request, xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -7,6 +7,21 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'data'/'live.json'
 UA={'User-Agent':'BitcoinCycleCompass/6.0 (+GitHub Pages)','Accept':'application/json,text/html,*/*'}
+
+# ---------------------------------------------------------------------------
+# v8.4 SQLite historical data layer — imported after ROOT is defined so that
+# relative paths in db_schema.py resolve correctly even if the script is run
+# from a different working directory.
+# ---------------------------------------------------------------------------
+sys.path.insert(0, str(Path(__file__).parent))
+try:
+    from db_schema import init_db
+    from history_service import get_daily_history, get_weekly_history
+    import import_history as _import_history_mod
+    _DB_AVAILABLE = True
+except ImportError as _db_import_err:
+    _DB_AVAILABLE = False
+    print(f'Warning: DB modules not available: {_db_import_err}', file=sys.stderr)
 
 def get(url, timeout=25):
     req=urllib.request.Request(url,headers=UA)
@@ -194,7 +209,7 @@ def btc_daily_history_four_years():
         if c is None:
             continue
         rows.append({
-            'day':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),
+            'day':datetime.fromtimestamp(int(t),tz=timezone.utc).strftime('%Y-%m-%d'),
             'usd':round(float(c),2)
         })
     return rows[-1465:]
@@ -262,6 +277,125 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
+def save_daily_to_db(conn, today, btc, aud, fg, st, etf, ma, ch, liq_scores, btc_score, proxies):
+    """
+    Upsert today's live data into all historical tables.
+    Uses INSERT OR REPLACE so running the updater twice in one day is safe.
+    Any individual table failure is logged but does not abort the others.
+    """
+    def _exec(sql, params):
+        try:
+            conn.execute(sql, params)
+        except Exception as e:
+            print(f'  DB insert warning ({sql[:40]}...): {e}', file=sys.stderr)
+
+    try:
+        if btc and aud:
+            _exec(
+                "INSERT OR REPLACE INTO btc_daily "
+                "(date, price_usd, price_aud, source, updated_at) "
+                "VALUES (?, ?, ?, 'live_update', strftime('%Y-%m-%dT%H:%M:%SZ','now'))",
+                (today, round(float(btc), 2), round(float(btc * aud), 2))
+            )
+        fg_val = fg.get('value') if isinstance(fg, dict) else None
+        if fg_val is not None:
+            _exec(
+                "INSERT OR REPLACE INTO fear_greed (date, value, label, change_24h) "
+                "VALUES (?, ?, ?, ?)",
+                (today, int(fg_val), fg.get('label', ''), fg.get('change24h', 0))
+            )
+        if isinstance(st, dict):
+            _exec(
+                "INSERT OR REPLACE INTO stablecoin_market_cap "
+                "(date, market_cap_usd, change_1d, change_7d, change_30d) VALUES (?, ?, ?, ?, ?)",
+                (today, st.get('marketCapUsd'), st.get('change1d', 0),
+                 st.get('change7d', 0), st.get('change30d', 0))
+            )
+        if isinstance(etf, dict):
+            _exec(
+                "INSERT OR REPLACE INTO etf_flows "
+                "(date, daily_usd_millions, five_day_usd_millions, twenty_day_usd_millions, "
+                "flow_score, combined_score, source) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (today, etf.get('dailyUsdMillions'), etf.get('fiveDayUsdMillions'),
+                 etf.get('twentyDayUsdMillions'), etf.get('flowScore'),
+                 etf.get('score'), etf.get('source', etf.get('status', '')))
+            )
+        ma_score = ma.get('score') if isinstance(ma, dict) else None
+        ch_score = ch.get('score') if isinstance(ch, dict) else None
+        _exec(
+            "INSERT OR REPLACE INTO scores "
+            "(date, macro_score, onchain_score, btc_score, fear_greed_value) VALUES (?, ?, ?, ?, ?)",
+            (today, ma_score, ch_score, btc_score,
+             int(fg_val) if fg_val is not None else None)
+        )
+        if isinstance(liq_scores, dict):
+            _exec(
+                "INSERT OR REPLACE INTO capital_allocation "
+                "(date, cash_bills, govt_bonds, global_equities, ai_technology, "
+                "emerging_markets, bitcoin, stablecoins, gold, silver) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (today,
+                 liq_scores.get('Cash & short-term bills'),
+                 liq_scores.get('Government bonds & fixed income'),
+                 liq_scores.get('Global equities'),
+                 liq_scores.get('AI technology'),
+                 liq_scores.get('Emerging markets'),
+                 liq_scores.get('Bitcoin'),
+                 liq_scores.get('Stablecoins'),
+                 liq_scores.get('Gold'),
+                 liq_scores.get('Silver'))
+            )
+        if isinstance(proxies, dict) and isinstance(ma, dict):
+            def _mav(series, key):
+                s = ma.get(series)
+                return s.get(key) if isinstance(s, dict) else None
+            _exec(
+                "INSERT OR REPLACE INTO market_data "
+                "(date, gold_price, gold_change_20d, sp500_change_20d, nasdaq_change_20d, "
+                "dxy_value, dxy_change_20d, us_10y_yield, us_10y_change_20d) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (today,
+                 proxies.get('gold', {}).get('last'),
+                 proxies.get('gold', {}).get('change20d'),
+                 proxies.get('equities', {}).get('change20d'),
+                 proxies.get('ai', {}).get('change20d'),
+                 _mav('DTWEXBGS', 'value'),
+                 _mav('DTWEXBGS', 'change20'),
+                 _mav('DGS10', 'value'),
+                 _mav('DGS10', 'change20'))
+            )
+        conn.commit()
+    except Exception as e:
+        print(f'Warning: DB save failed, rolling back: {e}', file=sys.stderr)
+        try:
+            conn.rollback()
+        except Exception:
+            pass
+
+
+def _db_history():
+    """
+    Return (daily_list, weekly_list) from SQLite.
+
+    If the database is empty, runs the four-year import first so the
+    History & Trends page has data on the very first updater run.
+    Falls back to ([], []) on any error.
+    """
+    if not _DB_AVAILABLE:
+        return [], []
+    try:
+        daily = get_daily_history()
+        if not daily:
+            print('DB empty -- importing four-year BTC history...', file=sys.stderr)
+            _import_history_mod.import_history(verbose=True)
+            daily = get_daily_history()
+        weekly = get_weekly_history()
+        return daily, weekly
+    except Exception as e:
+        print(f'Warning: DB history read failed: {e}', file=sys.stderr)
+        return [], []
+
+
 def main():
     previous={}
     try: previous=json.loads(OUT.read_text(encoding='utf-8'))
@@ -319,6 +453,24 @@ def main():
       'Other':0,
     }
     live_news=safe(news,[]) or previous.get('news',[]) or []
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':safe(weekly_btc_history,[]) or [],'historyDaily':safe(daily_btc_history,[]) or [],'proxies':proxies,'news':live_news,'events':events()}
+
+    # v8.4: persist today's data to SQLite and read history back from the DB.
+    today=datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    if _DB_AVAILABLE:
+        try:
+            _db_conn=init_db()
+            save_daily_to_db(_db_conn, today, btc, aud, fg, st, etf, ma, ch, scores, btc_score, proxies)
+            _db_conn.close()
+        except Exception as _db_err:
+            print(f'Warning: DB daily save failed: {_db_err}', file=sys.stderr)
+
+    # Retrieve history from SQLite; fall back to Yahoo Finance fetch if DB is empty.
+    daily_hist, weekly_hist = _db_history()
+    if not daily_hist:
+        daily_hist=safe(daily_btc_history,[]) or []
+    if not weekly_hist:
+        weekly_hist=safe(weekly_btc_history,[]) or []
+
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events()}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
