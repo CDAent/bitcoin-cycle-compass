@@ -1,34 +1,27 @@
-BITCOIN CYCLE COMPASS VERSION 5 - FINAL SNAPSHOT EDITION
+BITCOIN CYCLE COMPASS VERSION 6
 
-PURPOSE
-A simple, reliable Bitcoin cycle snapshot for phone and desktop.
+FILES TO UPLOAD
+Upload the complete contents of this package to the root of your existing GitHub repository, including the hidden .github folder.
 
-LIVE WHEN AVAILABLE
-- Bitcoin price in AUD and USD
-- Implied AUD/USD exchange rate
-- Fear & Greed Index
-- Seven-day stablecoin supply change
+FIRST-TIME SETUP
+1. Upload all files and folders.
+2. Open the repository Actions tab.
+3. Select "Update live market data" and choose Run workflow.
+4. In Settings > Actions > General, set Workflow permissions to "Read and write permissions" if the action cannot commit data/live.json.
+5. Keep GitHub Pages publishing from main / root.
 
-MANUAL RESEARCH INPUTS
-- Bitcoin ETF flow signal
-- Macro liquidity
-- On-chain conditions
-- Top-five global liquidity rankings
+AUTOMATIC UPDATES
+The GitHub Action runs hourly and writes data/live.json. The phone dashboard checks that file every 15 minutes while open.
 
-MODEL ESTIMATES
-- Drawdown from assumed cycle high
-- Expected next bottom range
-- Expected next peak range
-- Opportunity and bottom-proximity scores
+LIVE SOURCES
+- BTC index: trimmed average/median check using Coinbase, Kraken, Bitstamp and CoinGecko index.
+- FX: Frankfurter.
+- Fear & Greed: Alternative.me.
+- Stablecoins: DefiLlama.
+- Macro: FRED public CSV series.
+- On-chain: Blockchain.com public charts.
+- ETF: best-effort Farside public table extraction. It displays Unavailable if the page layout blocks extraction.
+- Market proxies: Stooq daily prices for GLD, QQQ, SLV and EEM.
+- News: GDELT live news search.
 
-GITHUB UPDATE
-Upload index.html, manifest.json, service-worker.js and README.txt to the repository root and replace the existing files. Commit the changes. After GitHub Pages republishes, fully close and reopen the Home Screen app.
-
-IMPORTANT
-Forecasts are estimates, not certainties or financial advice.
-
-24-HOUR COLOUR UPDATE
-- Positive 24-hour moves are shown in green.
-- Negative 24-hour moves are shown in red.
-- Neutral or unavailable changes remain grey.
-- The research summary builds a local 24-hour comparison history after the dashboard has been used for at least one day.
+The cycle forecasts are estimates, not live facts or financial advice.

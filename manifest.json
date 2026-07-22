@@ -1,8 +1,16 @@
 {
-  "name": "Bitcoin Cycle Compass v5",
+  "name": "Bitcoin Cycle Compass",
   "short_name": "BTC Compass",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0b1020",
-  "theme_color": "#111827"
+  "theme_color": "#111827",
+  "icons": [
+    {
+      "src": "bitcoin-compass-logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
