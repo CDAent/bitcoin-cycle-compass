@@ -1,1 +1,19 @@
-{"generatedAt":null,"status":"Waiting for first GitHub Action refresh","news":[]}
+{
+  "generatedAt": null,
+  "status": "Waiting for first GitHub Action refresh",
+  "news": [],
+  "etf": {
+    "status": "proxy only",
+    "dailyUsdMillions": null,
+    "fiveDayUsdMillions": null,
+    "twentyDayUsdMillions": null,
+    "score": 50,
+    "scoreSource": "awaiting first GitHub Action run",
+    "proxy": {
+      "status": "unavailable",
+      "score": 50,
+      "label": "Awaiting update",
+      "funds": []
+    }
+  }
+}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import csv, io, json, math, re, statistics, urllib.parse, urllib.request
+import csv, io, json, math, re, statistics, urllib.parse, urllib.request, xml.etree.ElementTree as ET
+from html.parser import HTMLParser
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -99,26 +100,123 @@ def stooq(symbol):
     closes=[float(r['Close']) for r in rows if r.get('Close') not in ('','N/D')]
     return {'last':closes[-1],'change20d':pct(closes[-1],closes[-min(21,len(closes))])}
 
+def _num_cell(raw):
+    raw=(raw or '').strip().replace(',','').replace('$','').replace('−','-')
+    if raw in ('','-','—','N/A'): return None
+    neg=raw.startswith('(') and raw.endswith(')')
+    raw=raw.strip('()')
+    try:
+        v=float(raw)
+        return -v if neg else v
+    except: return None
+
+class _TableParser(HTMLParser):
+    def __init__(self):
+        super().__init__(); self.rows=[]; self.row=None; self.cell=None
+    def handle_starttag(self,tag,attrs):
+        if tag=='tr': self.row=[]
+        elif tag in ('td','th') and self.row is not None: self.cell=[]
+    def handle_data(self,data):
+        if self.cell is not None: self.cell.append(data)
+    def handle_endtag(self,tag):
+        if tag in ('td','th') and self.cell is not None:
+            self.row.append(' '.join(''.join(self.cell).split())); self.cell=None
+        elif tag=='tr' and self.row is not None:
+            if self.row:self.rows.append(self.row)
+            self.row=None
+
+def _parse_farside(url):
+    parser=_TableParser(); parser.feed(get(url))
+    rows=[]
+    for r in parser.rows:
+        if not r: continue
+        date=r[0].strip()
+        if not re.search(r'\b20\d{2}\b',date): continue
+        val=_num_cell(r[-1])
+        if val is None: continue
+        try: dt=datetime.strptime(date,'%d %b %Y')
+        except:
+            try: dt=datetime.strptime(date,'%d %B %Y')
+            except: continue
+        rows.append({'date':dt.strftime('%Y-%m-%d'),'usdMillions':val})
+    rows.sort(key=lambda x:x['date'])
+    return rows
+
+def _yahoo_etf(ticker):
+    url=f'https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?range=1mo&interval=1d&events=history'
+    d=jget(url)['chart']['result'][0]
+    q=d['indicators']['quote'][0]; closes=q.get('close',[]); vols=q.get('volume',[])
+    pts=[(float(c),float(v or 0)) for c,v in zip(closes,vols) if c is not None]
+    if len(pts)<2: raise RuntimeError('insufficient ETF history')
+    last,prev=pts[-1],pts[-2]
+    ret=pct(last[0],prev[0]); avgvol=sum(v for _,v in pts[-20:])/max(1,len(pts[-20:]))
+    vr=last[1]/avgvol if avgvol else 1
+    return {'ticker':ticker,'close':last[0],'return1d':ret,'volume':last[1],'volumeVs20d':vr,'dollarVolumeUsd':last[0]*last[1]}
+
+def etf_demand_proxy():
+    funds=[]
+    for t in ['IBIT','FBTC','ARKB','BITB','GBTC','BTC']:
+        x=safe(lambda t=t:_yahoo_etf(t))
+        if x: funds.append(x)
+    if not funds:return {'status':'unavailable','score':50,'funds':[]}
+    total=sum(x['dollarVolumeUsd'] for x in funds) or 1
+    ret=sum(x['return1d']*x['dollarVolumeUsd'] for x in funds)/total
+    vr=sum(x['volumeVs20d']*x['dollarVolumeUsd'] for x in funds)/total
+    score=round(clamp(50+ret*5+(vr-1)*12))
+    label='Strong demand' if score>=65 else 'Positive demand' if score>=55 else 'Balanced' if score>=45 else 'Weak demand' if score>=35 else 'Strong selling pressure'
+    return {'status':'live proxy','score':score,'label':label,'return1d':ret,'volumeVs20d':vr,'aggregateDollarVolumeUsd':total,'funds':funds}
+
 def etf_flow():
-    # Best-effort live public table extraction. If layout changes, status is unavailable rather than manual.
-    html=get('https://farside.co.uk/btc/')
-    text=re.sub('<[^>]+>',' ',html); text=re.sub(r'\s+',' ',text)
-    nums=[]
-    for m in re.finditer(r'(\d{1,2}\s+[A-Z][a-z]{2}\s+20\d{2}).{0,500}?Total.{0,80}?([\-\(]?[\d,]+(?:\.\d+)?\)?)',text,re.I):
-        raw=m.group(2).replace(',','').replace('(','-').replace(')','')
-        try: nums.append({'date':m.group(1),'usdMillions':float(raw)})
+    rows=[]; source=None
+    for url in ['https://farside.co.uk/bitcoin-etf-flow-all-data/','https://farside.co.uk/btc/']:
+        try:
+            rows=_parse_farside(url)
+            if rows: source=url; break
         except: pass
-    if not nums:return {'status':'unavailable','dailyUsdMillions':None,'score':50}
-    v=nums[-1]['usdMillions']; return {'status':'live','dailyUsdMillions':v,'date':nums[-1]['date'],'score':round(clamp(50+v/15))}
+    proxy=etf_demand_proxy()
+    if rows:
+        latest=rows[-1]; last5=sum(x['usdMillions'] for x in rows[-5:]); last20=sum(x['usdMillions'] for x in rows[-20:])
+        flow_score=round(clamp(50+latest['usdMillions']/15))
+        combined=round(clamp(flow_score*0.72+proxy.get('score',50)*0.28))
+        return {'status':'live','source':'Farside','sourceUrl':source,'dailyUsdMillions':latest['usdMillions'],'date':latest['date'],'fiveDayUsdMillions':last5,'twentyDayUsdMillions':last20,'flowScore':flow_score,'proxy':proxy,'score':combined,'scoreSource':'confirmed flow + ETF demand proxy'}
+    return {'status':'proxy only','dailyUsdMillions':None,'fiveDayUsdMillions':None,'twentyDayUsdMillions':None,'proxy':proxy,'score':proxy.get('score',50),'scoreSource':'ETF demand proxy only'}
 
 def news():
-    q='(bitcoin OR Federal Reserve OR inflation OR interest rates OR oil OR tariffs OR recession) markets'
-    url='https://api.gdeltproject.org/api/v2/doc/doc?'+urllib.parse.urlencode({'query':q,'mode':'artlist','maxrecords':12,'format':'json','sort':'datedesc','timespan':'3d'})
-    d=jget(url); items=[]
-    for a in d.get('articles',[]):
-        title=a.get('title','').strip(); link=a.get('url','');
-        if title and link: items.append({'title':title,'url':link,'source':a.get('domain',''),'date':a.get('seendate','')})
-    return items[:8]
+    queries=[
+      'bitcoin markets when:3d',
+      'Federal Reserve inflation interest rates markets when:3d',
+      'global liquidity stocks gold markets when:3d'
+    ]
+    items=[]; seen=set()
+    for q in queries:
+        try:
+            url='https://news.google.com/rss/search?'+urllib.parse.urlencode({'q':q,'hl':'en-AU','gl':'AU','ceid':'AU:en'})
+            root=ET.fromstring(get(url))
+            for node in root.findall('.//item'):
+                title=(node.findtext('title') or '').strip(); link=(node.findtext('link') or '').strip(); date=(node.findtext('pubDate') or '').strip(); source=node.findtext('source') or ''
+                key=title.lower()
+                if title and link and key not in seen:
+                    seen.add(key);items.append({'title':title,'url':link,'source':source,'date':date})
+        except Exception:
+            pass
+    if not items:
+        try:
+            q='(bitcoin OR Federal Reserve OR inflation OR interest rates OR gold OR oil) markets'
+            url='https://api.gdeltproject.org/api/v2/doc/doc?'+urllib.parse.urlencode({'query':q,'mode':'artlist','maxrecords':12,'format':'json','sort':'datedesc','timespan':'3d'})
+            d=jget(url)
+            for a in d.get('articles',[]):
+                title=a.get('title','').strip(); link=a.get('url','')
+                if title and link:items.append({'title':title,'url':link,'source':a.get('domain',''),'date':a.get('seendate','')})
+        except Exception:pass
+    return items[:15]
+
+def events():
+    return [
+      {'tag':'UPCOMING','title':'Federal Reserve policy meetings and releases','source':'Federal Reserve','url':'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm'},
+      {'tag':'UPCOMING','title':'US CPI and inflation release calendar','source':'U.S. Bureau of Labor Statistics','url':'https://www.bls.gov/schedule/news_release/cpi.htm'},
+      {'tag':'UPCOMING','title':'US GDP and economic release schedule','source':'U.S. Bureau of Economic Analysis','url':'https://www.bea.gov/news/schedule'},
+      {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
+    ]
 
 def main():
     btc,exchanges,btc24=price_sources(); aud=fx(); fg=fear(); st=stablecoins(); ma=macro(); ch=chain(); etf=safe(etf_flow,{'status':'unavailable','dailyUsdMillions':None,'score':50})
@@ -133,6 +231,6 @@ def main():
       'Silver':round(clamp(52+proxies['silver']['change20d']*3+proxies['gold']['change20d'])),
       'Emerging markets':round(clamp(50+proxies['emerging']['change20d']*3+(ma['score']-50)*0.2)),
     }
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'btc':{'usd':btc,'aud':btc*aud,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'proxies':proxies,'news':safe(news,[]) or []}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'btc':{'usd':btc,'aud':btc*aud,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'proxies':proxies,'news':safe(news,[]) or [],'events':events()}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
