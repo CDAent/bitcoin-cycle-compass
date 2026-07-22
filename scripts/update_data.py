@@ -182,6 +182,18 @@ def etf_flow():
     return {'status':'proxy only','dailyUsdMillions':None,'fiveDayUsdMillions':None,'twentyDayUsdMillions':None,'proxy':proxy,'score':proxy.get('score',50),'scoreSource':'ETF demand proxy only'}
 
 
+
+def daily_btc_history():
+    url='https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=1mo&interval=1d&events=history'
+    d=jget(url)['chart']['result'][0]
+    ts=d.get('timestamp',[])
+    closes=d.get('indicators',{}).get('quote',[{}])[0].get('close',[])
+    rows=[]
+    for t,c in zip(ts,closes):
+        if c is not None:
+            rows.append({'day':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),'usd':round(float(c),2)})
+    return rows[-35:]
+
 def weekly_btc_history():
     url='https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=4y&interval=1wk&events=history'
     d=jget(url)['chart']['result'][0]
@@ -193,34 +205,48 @@ def weekly_btc_history():
         rows.append({'week':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),'usd':round(float(c),2)})
     return rows[-208:]
 
-def news():
-    queries=[
-      'bitcoin markets when:3d',
-      'Federal Reserve inflation interest rates markets when:3d',
-      'global liquidity stocks gold markets when:3d'
+def article_significance(title, source=''):
+    t=(title or '').lower();score=18;tags=[];impact='Watchlist';why='This story may affect market expectations, but its broader financial impact has not yet been confirmed.'
+    rules=[
+      (['federal reserve','fed rate','fomc','ecb','rba','bank of japan','interest rate decision'],38,['Macro','Bonds','Global Liquidity'],'Central-bank policy can alter borrowing costs, currencies, bond yields and global liquidity.'),
+      (['inflation','cpi','pce','jobs report','payrolls','gdp','recession'],30,['Macro','Bonds','Equities'],'Major economic data can change interest-rate expectations and risk-asset pricing.'),
+      (['sec','regulator','regulation','ban','approval','court ruling'],27,['Regulation','Bitcoin'],'Regulatory decisions can change market access, compliance costs and institutional participation.'),
+      (['bitcoin etf','etf inflow','etf outflow','blackrock','fidelity'],25,['Bitcoin','Institutional'],'ETF developments can affect institutional demand and Bitcoin market liquidity.'),
+      (['war','attack','sanctions','tariff','trade war','geopolitical'],30,['Macro','Gold','Equities'],'Geopolitical shocks can move energy, currencies, safe-haven assets and global risk appetite.'),
+      (['bank failure','banking crisis','credit crisis','default'],34,['Banks','Bonds','Global Liquidity'],'Financial-system stress can tighten credit conditions and trigger broad risk repricing.'),
+      (['oil','opec','energy prices'],18,['Commodities','Macro'],'Energy-price changes can influence inflation, corporate costs and monetary-policy expectations.'),
+      (['earnings','nvidia','apple','microsoft','amazon','alphabet','meta'],13,['Equities','AI Technology'],'Large-company results can move major equity indices and technology-sector expectations.'),
+      (['bitcoin','crypto','stablecoin'],12,['Bitcoin'],'Crypto-specific developments can affect digital-asset liquidity and sentiment.')
     ]
-    items=[]; seen=set()
+    for terms,points,new_tags,new_why in rules:
+        if any(term in t for term in terms):
+            score+=points;tags.extend(new_tags);why=new_why
+    score=max(1,min(100,score));stars=5 if score>=82 else 4 if score>=65 else 3 if score>=45 else 2 if score>=28 else 1
+    bullish=['cuts rates','rate cut','approval','inflows','inflation falls','inflation cools','stimulus','liquidity rises']
+    bearish=['raises rates','rate hike','outflows','ban','recession','default','war','attack','inflation rises','inflation surges']
+    if any(x in t for x in bullish):impact='Bullish'
+    elif any(x in t for x in bearish):impact='Bearish'
+    elif score>=65:impact='Watchlist'
+    else:impact='Neutral'
+    return {'impactScore':score,'stars':stars,'impact':impact,'tags':list(dict.fromkeys(tags))[:4],'why':why}
+
+def news():
+    queries=['bitcoin markets when:3d','Federal Reserve inflation interest rates markets when:3d','global liquidity stocks gold markets when:3d']
+    items=[];seen=set()
     for q in queries:
         try:
             url='https://news.google.com/rss/search?'+urllib.parse.urlencode({'q':q,'hl':'en-AU','gl':'AU','ceid':'AU:en'})
             root=ET.fromstring(get(url))
             for node in root.findall('.//item'):
-                title=(node.findtext('title') or '').strip(); link=(node.findtext('link') or '').strip(); date=(node.findtext('pubDate') or '').strip(); source=node.findtext('source') or ''
-                key=title.lower()
+                title=(node.findtext('title') or '').strip();link=(node.findtext('link') or '').strip();date=(node.findtext('pubDate') or '').strip();source=node.findtext('source') or '';key=re.sub(r'[^a-z0-9 ]','',title.lower())
                 if title and link and key not in seen:
-                    seen.add(key);items.append({'title':title,'url':link,'source':source,'date':date})
-        except Exception:
-            pass
-    if not items:
-        try:
-            q='(bitcoin OR Federal Reserve OR inflation OR interest rates OR gold OR oil) markets'
-            url='https://api.gdeltproject.org/api/v2/doc/doc?'+urllib.parse.urlencode({'query':q,'mode':'artlist','maxrecords':12,'format':'json','sort':'datedesc','timespan':'3d'})
-            d=jget(url)
-            for a in d.get('articles',[]):
-                title=a.get('title','').strip(); link=a.get('url','')
-                if title and link:items.append({'title':title,'url':link,'source':a.get('domain',''),'date':a.get('seendate','')})
+                    seen.add(key);item={'title':title,'url':link,'source':source,'date':date};item.update(article_significance(title,source));items.append(item)
         except Exception:pass
-    return items[:15]
+    def parsed_date(item):
+        try:return email.utils.parsedate_to_datetime(item.get('date','')).timestamp()
+        except Exception:return 0
+    items.sort(key=parsed_date,reverse=True)
+    return items[:20]
 
 def events():
     return [
@@ -287,6 +313,6 @@ def main():
       'Other':0,
     }
     live_news=safe(news,[]) or previous.get('news',[]) or []
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':safe(weekly_btc_history,[]) or [],'proxies':proxies,'news':live_news,'events':events()}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':safe(weekly_btc_history,[]) or [],'historyDaily':safe(daily_btc_history,[]) or [],'proxies':proxies,'news':live_news,'events':events()}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()

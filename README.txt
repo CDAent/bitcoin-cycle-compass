@@ -101,3 +101,12 @@ VERSION 8.1 RC1 EVIDENCE FRAMEWORK
 - Anonymous claims, rumours, unsourced social posts and promotional content are
   explicitly excluded by the external research source policy.
 - External answers without a source list are visibly marked incomplete.
+
+
+VERSION 8.2 HISTORY AND MARKET INTELLIGENCE
+- Added 1 Week and 1 Month daily history views.
+- Retained weekly 3 Month, 6 Month, 1 Year, 2 Year and 4 Year views.
+- Market articles sort newest first.
+- Article metadata order is source, time, then star rating.
+- Stars measure estimated global financial significance, not article quality.
+- Added impact score, directional tag, affected-market tags and “Why this matters”.
