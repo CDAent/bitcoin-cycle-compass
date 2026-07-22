@@ -83,8 +83,9 @@ class TestDatabaseCreation(unittest.TestCase):
         self.conn.close()
         self.db_path.unlink(missing_ok=True)
 
-    def test_schema_version_set_to_one(self):
-        self.assertEqual(get_schema_version(self.conn), 1)
+    def test_schema_version_set_to_current(self):
+        from db_schema import CURRENT_VERSION
+        self.assertEqual(get_schema_version(self.conn), CURRENT_VERSION)
 
     def test_all_required_tables_exist(self):
         existing = {
@@ -128,7 +129,8 @@ class TestDatabaseCreation(unittest.TestCase):
         """Applying migrations twice should not raise or change the version."""
         apply_migrations(self.conn)
         apply_migrations(self.conn)
-        self.assertEqual(get_schema_version(self.conn), 1)
+        from db_schema import CURRENT_VERSION
+        self.assertEqual(get_schema_version(self.conn), CURRENT_VERSION)
 
     def test_existing_rows_survive_re_migration(self):
         """Data inserted before a re-migration must still be there after."""

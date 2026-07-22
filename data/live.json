@@ -98,7 +98,7 @@
       "url": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
     }
   ],
-  "appVersion": "8.3.1",
+  "appVersion": "8.4.0-dev",
   "liquidityTrends": {
     "Cash & short-term bills": 0.0,
     "Government bonds & fixed income": 0.0,
@@ -8464,5 +8464,25 @@
       "usd": 65889.89,
       "aud": null
     }
-  ]
+  ],
+  "buildMeta": {
+    "appVersion": "8.4.0-dev",
+    "sprint": "2A",
+    "gitCommit": "63ec224",
+    "buildDate": "2026-07-22T16:46:35Z",
+    "databaseVersion": "2",
+    "lastSuccessfulUpdate": "2026-07-22T16:46:35Z"
+  },
+  "latestSnapshot": {
+    "date": "2026-07-22",
+    "btc_usd": 66249.171875,
+    "fear_greed_value": 33,
+    "gold_price": 380.575012,
+    "sp500_price": 749.830017,
+    "nasdaq_price": 708.5,
+    "dxy_value": 101.139,
+    "us_10y_yield": 4.654,
+    "aud_usd": 0.699643,
+    "btc_quality_status": "live"
+  }
 }
