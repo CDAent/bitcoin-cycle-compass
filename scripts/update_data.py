@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import csv, io, json, math, re, statistics, urllib.parse, urllib.request, xml.etree.ElementTree as ET
 from html.parser import HTMLParser
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -183,27 +183,33 @@ def etf_flow():
 
 
 
-def daily_btc_history():
-    url='https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=1mo&interval=1d&events=history'
+def btc_daily_history_four_years():
+    url='https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=4y&interval=1d&events=history'
     d=jget(url)['chart']['result'][0]
     ts=d.get('timestamp',[])
-    closes=d.get('indicators',{}).get('quote',[{}])[0].get('close',[])
+    quote=d.get('indicators',{}).get('quote',[{}])[0]
+    closes=quote.get('close',[])
     rows=[]
     for t,c in zip(ts,closes):
-        if c is not None:
-            rows.append({'day':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),'usd':round(float(c),2)})
-    return rows[-35:]
+        if c is None:
+            continue
+        rows.append({
+            'day':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),
+            'usd':round(float(c),2)
+        })
+    return rows[-1465:]
+
+def daily_btc_history():
+    return btc_daily_history_four_years()
 
 def weekly_btc_history():
-    url='https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=4y&interval=1wk&events=history'
-    d=jget(url)['chart']['result'][0]
-    ts=d.get('timestamp',[])
-    closes=d.get('indicators',{}).get('quote',[{}])[0].get('close',[])
-    rows=[]
-    for t,c in zip(ts,closes):
-        if c is None: continue
-        rows.append({'week':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),'usd':round(float(c),2)})
-    return rows[-208:]
+    daily=btc_daily_history_four_years()
+    weeks={}
+    for row in daily:
+        day=datetime.strptime(row['day'],'%Y-%m-%d')
+        monday=(day-timedelta(days=day.weekday())).strftime('%Y-%m-%d')
+        weeks[monday]={'week':monday,'usd':row['usd']}
+    return list(weeks.values())[-208:]
 
 def article_significance(title, source=''):
     t=(title or '').lower();score=18;tags=[];impact='';why='This story may affect market expectations, but its broader financial impact has not yet been confirmed.'

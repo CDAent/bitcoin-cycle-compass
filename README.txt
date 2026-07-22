@@ -148,3 +148,16 @@ VERSION 8.3 UI/UX POLISH
 - Improved Compass Ai Analyst spacing and evidence readability.
 - Retained the rebuilt persistent pinned-article workflow.
 - Refined stars: lighter empty outlines, thinner filled stars and improved spacing.
+
+
+VERSION 8.3.1 REQUESTED CHANGES
+- Market page title changed to “Market News & Events”.
+- Navigation order and labels otherwise remain unchanged.
+- Alerts routing fixed with a dedicated Alerts page and empty state.
+- Alert preferences can be saved locally for future notification delivery.
+- Settings widgets now align action buttons along their bottom edges.
+- Daily Bitcoin history updater expanded from one month to four years.
+- Weekly history is derived from the same genuine daily market-price series.
+- The daily updater refreshes the four-year rolling history on each scheduled run.
+- History uses daily resolution for 1 week, 1 month, 3 months and 6 months;
+  weekly resolution remains for 1, 2 and 4 years.
