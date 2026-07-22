@@ -127,3 +127,24 @@ VERSION 8.2.2 PINNED ARTICLES
 - Added a Pinned for later section on Market Intelligence.
 - Added Pin for later and Unpin article controls.
 - Pinned articles are stored locally in the browser and remain after refresh.
+
+
+VERSION 8.2.2 FIXED
+- Rebuilt pinned-article storage and event handling.
+- Pinning now updates in place without reopening the page.
+- Saved articles remain in localStorage after refresh.
+- Articles removed from the live feed remain in the pinned section.
+- Added pin/unpin icon state and pinned date.
+- Empty stars are now lighter, thinner and partially transparent.
+
+
+VERSION 8.3 UI/UX POLISH
+- Public version updated to 8.3 with no internal “Fixed” wording.
+- Unified spacing, card radii, button sizing and focus states.
+- Added subtle hover and page-transition effects.
+- Added refresh/loading overlay and spinner.
+- Improved mobile responsiveness and touch targets.
+- Improved History & Trends horizontal chart handling on small screens.
+- Improved Compass Ai Analyst spacing and evidence readability.
+- Retained the rebuilt persistent pinned-article workflow.
+- Refined stars: lighter empty outlines, thinner filled stars and improved spacing.
