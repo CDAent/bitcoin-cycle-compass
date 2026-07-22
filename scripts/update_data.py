@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 try:
     from db_schema import init_db
     from history_service import get_daily_history, get_weekly_history
+    from snapshot_service import upsert_snapshot, set_build_metadata
     import import_history as _import_history_mod
     _DB_AVAILABLE = True
 except ImportError as _db_import_err:
@@ -277,6 +278,22 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
+_APP_VERSION = '8.4.0-dev'
+_SPRINT = '2A'
+
+
+def _git_commit():
+    """Return the short HEAD commit hash, or 'unknown'."""
+    import subprocess
+    try:
+        return subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'],
+            stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        return 'unknown'
+
+
 def save_daily_to_db(conn, today, btc, aud, fg, st, etf, ma, ch, liq_scores, btc_score, proxies):
     """
     Upsert today's live data into all historical tables.
@@ -373,6 +390,122 @@ def save_daily_to_db(conn, today, btc, aud, fg, st, etf, ma, ch, liq_scores, btc
             pass
 
 
+def write_full_snapshot(conn, today, now_utc, btc, aud, fg, st, etf, ma, ch,
+                        liq_scores, btc_score, proxies):
+    """
+    Write a complete market_snapshots row for today.
+    NULL is stored for any metric that is genuinely unavailable.
+    A second call on the same day performs an UPDATE (INSERT OR REPLACE).
+    """
+    def _pct_chg(last, prev):
+        try:
+            return round((float(last) / float(prev) - 1) * 100, 4) if prev else None
+        except (TypeError, ValueError):
+            return None
+
+    fg_val  = fg.get('value')  if isinstance(fg, dict) else None
+    ma_sc   = ma.get('score')  if isinstance(ma, dict) else None
+    ch_sc   = ch.get('score')  if isinstance(ch, dict) else None
+
+    gold_px  = proxies.get('gold',     {}).get('last')  if isinstance(proxies, dict) else None
+    spy_px   = proxies.get('equities', {}).get('last')  if isinstance(proxies, dict) else None
+    qqq_px   = proxies.get('ai',       {}).get('last')  if isinstance(proxies, dict) else None
+
+    btc_usd  = round(float(btc), 2) if btc else None
+    btc_aud  = round(float(btc) * float(aud), 2) if btc and aud else None
+    aud_usd  = round(float(aud), 6) if aud else None
+
+    etf_daily   = etf.get('dailyUsdMillions')   if isinstance(etf, dict) else None
+    etf_cum     = etf.get('twentyDayUsdMillions') if isinstance(etf, dict) else None
+    etf_score   = etf.get('score')               if isinstance(etf, dict) else None
+    etf_src     = etf.get('source', etf.get('status', '')) if isinstance(etf, dict) else None
+    etf_quality = 'confirmed' if (isinstance(etf, dict) and etf.get('status') == 'live') else                   'proxy' if isinstance(etf, dict) else 'unavailable'
+
+    stable_cap = st.get('marketCapUsd') if isinstance(st, dict) else None
+    stable_7d  = st.get('change7d')     if isinstance(st, dict) else None
+
+    liq = liq_scores if isinstance(liq_scores, dict) else {}
+
+    fields = {
+        # Bitcoin
+        'btc_usd':               btc_usd,
+        'btc_aud':               btc_aud,
+        'btc_change_24h':        fg.get('change24h') if isinstance(fg, dict) else None,
+        'btc_source':            'multi_exchange' if btc_usd else None,
+        'btc_fetched_at':        now_utc if btc_usd else None,
+        'btc_verified':          1 if btc_usd else 0,
+        'btc_quality_status':    'live' if btc_usd else 'unavailable',
+        # Sentiment
+        'fear_greed_value':      int(fg_val) if fg_val is not None else None,
+        'fear_greed_label':      fg.get('label') if isinstance(fg, dict) else None,
+        'fear_greed_source':     'alternative.me',
+        'fear_greed_fetched_at': now_utc if fg_val is not None else None,
+        'fear_greed_quality':    'live' if fg_val is not None else 'unavailable',
+        # ETF
+        'etf_daily_usd_millions':      etf_daily,
+        'etf_cumulative_usd_millions': etf_cum,
+        'etf_flow_score':              etf_score,
+        'etf_source':                  etf_src,
+        'etf_fetched_at':              now_utc,
+        'etf_quality':                 etf_quality,
+        # Stablecoins
+        'stablecoin_market_cap_usd': stable_cap,
+        'stablecoin_change_7d':      stable_7d,
+        'stablecoin_source':         'llama.fi',
+        'stablecoin_fetched_at':     now_utc if stable_cap else None,
+        'stablecoin_quality':        'live' if stable_cap else 'unavailable',
+        # Scores
+        'macro_score':       ma_sc,
+        'onchain_score':     ch_sc,
+        'btc_score':         btc_score,
+        'scores_quality':    'live' if (ma_sc is not None or ch_sc is not None) else 'unavailable',
+        # Capital allocation
+        'alloc_cash_bills':        liq.get('Cash & short-term bills'),
+        'alloc_govt_bonds':        liq.get('Government bonds & fixed income'),
+        'alloc_global_equities':   liq.get('Global equities'),
+        'alloc_ai_technology':     liq.get('AI technology'),
+        'alloc_emerging_markets':  liq.get('Emerging markets'),
+        'alloc_bitcoin':           liq.get('Bitcoin'),
+        'alloc_stablecoins':       liq.get('Stablecoins'),
+        'alloc_gold':              liq.get('Gold'),
+        'alloc_silver':            liq.get('Silver'),
+        # Traditional markets
+        'gold_price':       gold_px,
+        'gold_source':      'stooq/GLD' if gold_px else None,
+        'gold_fetched_at':  now_utc if gold_px else None,
+        'gold_quality':     'live' if gold_px else 'unavailable',
+        'sp500_price':      spy_px,
+        'sp500_source':     'stooq/SPY' if spy_px else None,
+        'sp500_fetched_at': now_utc if spy_px else None,
+        'sp500_quality':    'live' if spy_px else 'unavailable',
+        'nasdaq_price':     qqq_px,
+        'nasdaq_source':    'stooq/QQQ' if qqq_px else None,
+        'nasdaq_fetched_at':now_utc if qqq_px else None,
+        'nasdaq_quality':   'live' if qqq_px else 'unavailable',
+        'aud_usd':          aud_usd,
+        'aud_usd_source':   'frankfurter.app' if aud_usd else None,
+        'aud_usd_fetched_at': now_utc if aud_usd else None,
+        'aud_usd_quality':  'live' if aud_usd else 'unavailable',
+        # DXY and US10Y from macro dict (FRED series)
+        'dxy_value':        (ma.get('DTWEXBGS', {}) or {}).get('value') if isinstance(ma, dict) else None,
+        'dxy_source':       'fred/DTWEXBGS',
+        'dxy_fetched_at':   now_utc,
+        'dxy_quality':      'live' if isinstance(ma, dict) and ma.get('DTWEXBGS') else 'unavailable',
+        'us_10y_yield':     (ma.get('DGS10', {}) or {}).get('value') if isinstance(ma, dict) else None,
+        'us_10y_source':    'fred/DGS10',
+        'us_10y_fetched_at': now_utc,
+        'us_10y_quality':   'live' if isinstance(ma, dict) and ma.get('DGS10') else 'unavailable',
+        # Audit
+        'updater_version':  _APP_VERSION,
+        'sprint':           _SPRINT,
+    }
+
+    try:
+        upsert_snapshot(conn, today, fields, now_utc)
+    except Exception as e:
+        print(f'Warning: write_full_snapshot failed: {e}', file=sys.stderr)
+
+
 def _db_history():
     """
     Return (daily_list, weekly_list) from SQLite.
@@ -456,10 +589,22 @@ def main():
 
     # v8.4: persist today's data to SQLite and read history back from the DB.
     today=datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    now_utc=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     if _DB_AVAILABLE:
         try:
             _db_conn=init_db()
             save_daily_to_db(_db_conn, today, btc, aud, fg, st, etf, ma, ch, scores, btc_score, proxies)
+            write_full_snapshot(_db_conn, today, now_utc, btc, aud, fg, st, etf, ma, ch, scores, btc_score, proxies)
+            _build_meta={
+                'appVersion':           _APP_VERSION,
+                'sprint':               _SPRINT,
+                'gitCommit':            _git_commit(),
+                'buildDate':            now_utc,
+                'databaseVersion':      '2',
+                'lastSuccessfulUpdate': now_utc if btc else 'partial',
+            }
+            set_build_metadata(_db_conn, _build_meta)
+            _db_conn.commit()
             _db_conn.close()
         except Exception as _db_err:
             print(f'Warning: DB daily save failed: {_db_err}', file=sys.stderr)
@@ -471,6 +616,12 @@ def main():
     if not weekly_hist:
         weekly_hist=safe(weekly_btc_history,[]) or []
 
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events()}
+    _build_meta_out={
+        'appVersion':_APP_VERSION,'sprint':_SPRINT,
+        'gitCommit':_git_commit() if _DB_AVAILABLE else 'unknown',
+        'buildDate':now_utc if _DB_AVAILABLE else datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'databaseVersion':'2','lastSuccessfulUpdate':now_utc if btc else 'partial',
+    }
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
