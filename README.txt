@@ -119,3 +119,11 @@ VERSION 8.2.1 MARKET INTELLIGENCE DISPLAY REFINEMENT
 - Removed the Watchlist label.
 - Direction labels now appear only when classified as Bullish, Bearish or Neutral.
 - The full article card remains the link to the source.
+
+
+VERSION 8.2.2 PINNED ARTICLES
+- Kept article-card colours unchanged.
+- Changed article metadata order to date/time, source, then star rating.
+- Added a Pinned for later section on Market Intelligence.
+- Added Pin for later and Unpin article controls.
+- Pinned articles are stored locally in the browser and remain after refresh.
