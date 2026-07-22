@@ -1,4 +1,4 @@
-const CACHE='btc-cycle-compass-v6-8';
+const CACHE='btc-cycle-compass-v6-9';
 const ASSETS=['./','./index.html','./manifest.json','./bitcoin-compass-logo.png','./data/live.json'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))});
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([clients.claim(),caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))])));
