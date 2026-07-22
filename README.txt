@@ -77,3 +77,27 @@ VERSION 8.0 COMPASS AI ANALYST AND WEEKLY HISTORY
 - Added up to 208 weekly Bitcoin records from a four-year market feed.
 - Local dashboard snapshots are stored weekly instead of daily.
 - Global Liquidity uses separate Destination, Allocation and Trend columns.
+
+
+VERSION 8.1 DATE LOCALISATION AND EXTERNAL RESEARCH
+- AUD displays dates as DD/MM/YY.
+- USD displays dates as MM/DD/YY.
+- Weekly-history, ETF and macro observation dates follow the selected currency.
+- Compass Ai Analyst now provides deeper interpretation, competing evidence,
+  scenario analysis, historical context and invalidation factors.
+- Added optional External Financial Research through a private endpoint.
+- Provider API keys remain on the private server rather than in GitHub Pages.
+
+
+VERSION 8.1 RC1 EVIDENCE FRAMEWORK
+- Compass Ai Analyst answers now separate Verified Facts, Market Interpretation,
+  Supporting Evidence, Risks & Counterarguments, and View-Changing Conditions.
+- Added Evidence-Based Mode, enabled by default.
+- Added Conservative, Balanced and Opportunistic emphasis profiles.
+- Added Show Evidence with source type, observation date, value and reliability rank.
+- Added Evidence Quality and confidence summary based only on available data.
+- External research requests now require attributable sources, publication dates,
+  URLs, uncertainty labels and conflicting evidence.
+- Anonymous claims, rumours, unsourced social posts and promotional content are
+  explicitly excluded by the external research source policy.
+- External answers without a source list are visibly marked incomplete.

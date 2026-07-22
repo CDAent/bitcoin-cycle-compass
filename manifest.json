@@ -1,6 +1,6 @@
 {
-  "name": "Bitcoin Cycle Compass Version 8.0",
-  "short_name": "BTC Compass 8",
+  "name": "Bitcoin Cycle Compass Version 8.1 RC1",
+  "short_name": "BTC Compass 8.1 RC1",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#040b13",
