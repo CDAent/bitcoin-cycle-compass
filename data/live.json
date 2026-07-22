@@ -1,21 +1,73 @@
 {
-  "generatedAt": null,
-  "status": "Waiting for first GitHub Action refresh",
-  "news": [],
+  "generatedAt": "2026-07-22T05:21:15.680918+00:00",
+  "status": "Partial live snapshot \u2022 retained last BTC price",
+  "btc": {
+    "usd": null,
+    "aud": null,
+    "change24h": 0,
+    "method": "trimmed average / median check",
+    "sources": []
+  },
+  "fx": {
+    "usdAud": 1.43,
+    "audUsd": 0.6993006993006994
+  },
+  "fearGreed": {
+    "value": 50,
+    "label": "Neutral",
+    "change24h": 0
+  },
+  "stablecoins": {
+    "marketCapUsd": null,
+    "change1d": 0,
+    "change7d": 0,
+    "change30d": 0
+  },
   "etf": {
-    "status": "proxy only",
+    "status": "market proxy only",
     "dailyUsdMillions": null,
     "fiveDayUsdMillions": null,
     "twentyDayUsdMillions": null,
-    "score": 50,
-    "scoreSource": "awaiting first GitHub Action run",
     "proxy": {
-      "status": "unavailable",
+      "status": "market proxy",
       "score": 50,
-      "label": "Awaiting update",
+      "label": "Balanced demand indication",
+      "return1d": 0,
+      "volumeVs20d": null,
       "funds": []
+    },
+    "score": 50,
+    "scoreSource": "ETF demand proxy only"
+  },
+  "macro": {
+    "score": 50
+  },
+  "onchain": {
+    "score": 50,
+    "metrics": {}
+  },
+  "liquidityScores": {
+    "Bitcoin & digital assets": 50,
+    "Gold & precious metals": 61,
+    "US AI & technology equities": 62,
+    "Silver": 52,
+    "Emerging markets": 50
+  },
+  "proxies": {
+    "gold": {
+      "change20d": 0
+    },
+    "equities": {
+      "change20d": 0
+    },
+    "silver": {
+      "change20d": 0
+    },
+    "emerging": {
+      "change20d": 0
     }
   },
+  "news": [],
   "events": [
     {
       "tag": "UPCOMING",
