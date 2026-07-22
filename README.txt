@@ -19,3 +19,7 @@ The complete needle image is rotated automatically during live-data refresh.
 No separate animation frames are required.
 The rotation pivot is currently set to 50% across and 40.72% down the full image canvas.
 If your hub is slightly above or below this point, adjust transform-origin in index.html.
+
+CENTRE-PIVOT FIX
+The supplied needle layer was shifted 1 px left and 3 px up so its hub aligns with the base-logo hub.
+The CSS rotation origin is now 49.64% horizontally and 36.48% vertically.
