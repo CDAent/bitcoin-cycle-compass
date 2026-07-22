@@ -15,5 +15,31 @@
       "label": "Awaiting update",
       "funds": []
     }
-  }
+  },
+  "events": [
+    {
+      "tag": "UPCOMING",
+      "title": "Federal Reserve policy meetings and releases",
+      "source": "Federal Reserve",
+      "url": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    },
+    {
+      "tag": "UPCOMING",
+      "title": "US CPI and inflation release calendar",
+      "source": "U.S. Bureau of Labor Statistics",
+      "url": "https://www.bls.gov/schedule/news_release/cpi.htm"
+    },
+    {
+      "tag": "UPCOMING",
+      "title": "US GDP and economic release schedule",
+      "source": "U.S. Bureau of Economic Analysis",
+      "url": "https://www.bea.gov/news/schedule"
+    },
+    {
+      "tag": "LIVE",
+      "title": "Market-implied Federal Reserve rate probabilities",
+      "source": "CME FedWatch",
+      "url": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"
+    }
+  ]
 }

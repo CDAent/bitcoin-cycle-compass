@@ -219,18 +219,45 @@ def events():
     ]
 
 def main():
-    btc,exchanges,btc24=price_sources(); aud=fx(); fg=fear(); st=stablecoins(); ma=macro(); ch=chain(); etf=safe(etf_flow,{'status':'unavailable','dailyUsdMillions':None,'score':50})
+    previous={}
+    try: previous=json.loads(OUT.read_text(encoding='utf-8'))
+    except: pass
+
+    price=safe(price_sources)
+    if price:
+        btc,exchanges,btc24=price
+    else:
+        old=previous.get('btc',{})
+        btc=old.get('usd'); exchanges=old.get('sources',[]); btc24=old.get('change24h',0)
+    aud=safe(fx, previous.get('fx',{}).get('usdAud',1.43))
+    fg=safe(fear, previous.get('fearGreed',{'value':50,'label':'Neutral','change24h':0}))
+    st=safe(stablecoins, previous.get('stablecoins',{'marketCapUsd':None,'change1d':0,'change7d':0,'change30d':0}))
+    ma=safe(macro, previous.get('macro',{'score':50}))
+    ch=safe(chain, previous.get('onchain',{'score':50}))
+    etf=safe(etf_flow, previous.get('etf',{'status':'unavailable','dailyUsdMillions':None,'score':50}))
+
+    # Guaranteed market-based indication when confirmed flow and ETF trading proxy fail.
+    proxy=etf.get('proxy') or {}
+    if proxy.get('status') not in ('live proxy',):
+        market_score=round(clamp(50+(btc24 or 0)*3+(float(fg.get('value',50))-50)*0.25+(float(st.get('change7d') or 0))*4))
+        label='Strong demand indication' if market_score>=65 else 'Positive demand indication' if market_score>=55 else 'Balanced demand indication' if market_score>=45 else 'Weak demand indication' if market_score>=35 else 'Strong selling indication'
+        etf['proxy']={'status':'market proxy','score':market_score,'label':label,'return1d':btc24 or 0,'volumeVs20d':None,'funds':[]}
+        if etf.get('status') in (None,'unavailable','proxy only'): etf['status']='market proxy only'
+        if etf.get('score') in (None,50): etf['score']=market_score
+
     proxies={}
-    for name,sym in [('gold','gld.us'),('equities','qqq.us'),('silver','slv.us'),('emerging','eem.us')]: proxies[name]=safe(lambda sym=sym:stooq(sym),{'change20d':0})
-    sentiment=round(clamp(fg['value']))
-    btc_score=round(clamp(0.22*etf['score']+0.20*ma['score']+0.18*ch['score']+0.20*sentiment+0.20*clamp(50+st['change7d']*8)))
+    for name,sym in [('gold','gld.us'),('equities','qqq.us'),('silver','slv.us'),('emerging','eem.us')]:
+        proxies[name]=safe(lambda sym=sym:stooq(sym),previous.get('proxies',{}).get(name,{'change20d':0}))
+    sentiment=round(clamp(float(fg.get('value',50))))
+    btc_score=round(clamp(0.22*float(etf.get('score',50))+0.20*float(ma.get('score',50))+0.18*float(ch.get('score',50))+0.20*sentiment+0.20*clamp(50+float(st.get('change7d') or 0)*8)))
     scores={
       'Bitcoin & digital assets':btc_score,
-      'Gold & precious metals':round(clamp(55+proxies['gold']['change20d']*3+(100-ma['score'])*0.12)),
-      'US AI & technology equities':round(clamp(55+proxies['equities']['change20d']*3+ma['score']*0.15)),
-      'Silver':round(clamp(52+proxies['silver']['change20d']*3+proxies['gold']['change20d'])),
-      'Emerging markets':round(clamp(50+proxies['emerging']['change20d']*3+(ma['score']-50)*0.2)),
+      'Gold & precious metals':round(clamp(55+proxies['gold'].get('change20d',0)*3+(100-float(ma.get('score',50)))*0.12)),
+      'US AI & technology equities':round(clamp(55+proxies['equities'].get('change20d',0)*3+float(ma.get('score',50))*0.15)),
+      'Silver':round(clamp(52+proxies['silver'].get('change20d',0)*3+proxies['gold'].get('change20d',0))),
+      'Emerging markets':round(clamp(50+proxies['emerging'].get('change20d',0)*3+(float(ma.get('score',50))-50)*0.2)),
     }
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'btc':{'usd':btc,'aud':btc*aud,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'proxies':proxies,'news':safe(news,[]) or [],'events':events()}
+    live_news=safe(news,[]) or previous.get('news',[]) or []
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'proxies':proxies,'news':live_news,'events':events()}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()

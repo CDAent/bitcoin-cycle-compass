@@ -1,36 +1,34 @@
-BITCOIN CYCLE COMPASS VERSION 6.4
+BITCOIN CYCLE COMPASS VERSION 6.7 GOLD
 
-BITCOIN CYCLE COMPASS VERSION 6.2
+UPLOAD
+Upload the complete contents of this package to the root of the existing GitHub repository, including the hidden .github folder.
 
-FILES TO UPLOAD
-Upload the complete contents of this package to the root of your existing GitHub repository, including the hidden .github folder.
+FIRST RUN
+1. Open the repository Actions tab.
+2. Run “Update live market data”.
+3. In Settings > Actions > General, use “Read and write permissions” if the workflow cannot commit data/live.json.
+4. Keep GitHub Pages publishing from main / root.
+5. Fully close and reopen the Home Screen app after GitHub Pages republishes.
 
-FIRST-TIME SETUP
-1. Upload all files and folders.
-2. Open the repository Actions tab.
-3. Select "Update live market data" and choose Run workflow.
-4. In Settings > Actions > General, set Workflow permissions to "Read and write permissions" if the action cannot commit data/live.json.
-5. Keep GitHub Pages publishing from main / root.
+UPDATES
+- GitHub Action: hourly live-data snapshot.
+- Dashboard: checks data/live.json every 15 minutes while open.
+- Refresh live data button: forces an immediate browser refresh.
+- Forecasts and composite scores: recalculate whenever new data is loaded.
+- News: snapshot feed with direct browser fallbacks.
+- Events: official source links remain available even if the news feed fails.
 
-AUTOMATIC UPDATES
-The GitHub Action runs hourly and writes data/live.json. The phone dashboard checks that file every 15 minutes while open.
+INDEX AUDIT
+- Dashboard: concise current-state summary.
+- Markets & Forecasts: BTC price, exchange index, FX, drawdown and cycle price models.
+- Global Liquidity: ETF flows, ETF demand proxy, stablecoins and comparative capital-flow scores.
+- On-Chain Metrics: Bitcoin network and blockchain measures only.
+- Macro Economy: central-bank liquidity, money supply, yields, dollar and volatility series.
+- News & Events: market-moving articles and official economic calendars.
+- History & Trends: locally stored daily snapshots.
+- Alerts: device-stored thresholds.
+- Settings: currency, refresh and local-data controls.
+- About & Glossary: colours, segments, probability meanings, methodology, sources and update cadence.
 
-LIVE SOURCES
-- BTC index: trimmed average/median check using Coinbase, Kraken, Bitstamp and CoinGecko index.
-- FX: Frankfurter.
-- Fear & Greed: Alternative.me.
-- Stablecoins: DefiLlama.
-- Macro: FRED public CSV series.
-- On-chain: Blockchain.com public charts.
-- ETF: dual-method tracking: confirmed Farside net flows plus a separate live demand proxy using IBIT, FBTC, ARKB, BITB, GBTC and BTC ETF price/volume participation. The proxy is clearly labelled and is not treated as confirmed net flow.
-- Market proxies: Stooq daily prices for GLD, QQQ, SLV and EEM.
-- News: GDELT live news search.
-
-The cycle forecasts are estimates, not live facts or financial advice.
-
-
-VERSION 6.4
-- Working navigation opens detailed views for each dashboard category.
-- News uses multiple live Google News RSS searches with GDELT fallback.
-- Events link to official Fed, BLS, BEA and CME calendars.
-- Local 30-day snapshot history and device-stored alert levels.
+IMPORTANT
+Live prices and source observations are factual feeds. Scores, rankings, bottom ranges, peak ranges and probabilities are model estimates for research, not guarantees or financial advice.
