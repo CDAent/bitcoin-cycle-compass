@@ -20,7 +20,7 @@
 <section class="card wide"><div class="label">Compass AI research summary</div><div id="summary" class="notice" style="margin-top:10px">Loading live research…</div></section>
 <section class="card wide"><div class="label">Major recent or upcoming market events</div><div class="news" id="news"></div><div class="small" style="margin-top:8px">Live news scan from GDELT. Headlines are links to the original publisher and should be verified before acting.</div></section>
 <section class="card wide notice"><strong>Forecast notice:</strong> price, FX, sentiment, liquidity and news feeds are live. The cycle bottom and peak ranges remain statistical estimates based on fixed diminishing-return assumptions, not certainties or financial advice.</section>
-</div><div class="footerline"><span id="footerUpdated">Last updated: —</span><span class="version">Version 6.1</span></div></div><script>
+</div><div class="footerline"><span id="footerUpdated">Last updated: —</span><span class="version">Version 6.2</span></div></div><script>
 let DATA=null,CUR=localStorage.getItem('btcCurrency')||'AUD';const $=x=>document.getElementById(x);const cls=v=>v>=75?'pos':v>=50?'neu':'neg';const move=v=>v>0?'pos':v<0?'neg':'neu';
 function money(v){return new Intl.NumberFormat(CUR==='AUD'?'en-AU':'en-US',{style:'currency',currency:CUR,maximumFractionDigits:0}).format(v)}
 function setCur(c){CUR=c;localStorage.setItem('btcCurrency',c);$('audBtn').classList.toggle('active',c==='AUD');$('usdBtn').classList.toggle('active',c==='USD');if(DATA)render()}
@@ -33,6 +33,44 @@ score('fear',d.fearGreed?.value);$('fearText').textContent=d.fearGreed?.label||'
 const ranks=Object.entries(d.liquidityScores||{}).sort((a,b)=>b[1]-a[1]);$('ranks').innerHTML=ranks.map((r,i)=>`<div class="rank"><div class="num">${i+1}</div><div><strong>${r[0]}</strong><div class="small">Live composite momentum score</div></div><span class="scorepill ${cls(r[1])}">${r[1]}</span></div>`).join('');
 const best=ranks[0],worst=ranks[ranks.length-1];const positives=[];if((d.btc.change24h||0)>0)positives.push('Bitcoin price is positive over 24 hours');if((d.stablecoins?.change7d||0)>0)positives.push('stablecoin liquidity is expanding');if((d.etf?.dailyUsdMillions||0)>0)positives.push('ETF flows are positive');const cautions=[];if((d.macro?.score||50)<50)cautions.push('macro conditions remain restrictive');if((d.fearGreed?.value||50)<40)cautions.push('sentiment remains fearful');if((d.onchain?.score||50)<50)cautions.push('on-chain conditions are soft');$('summary').innerHTML=`<strong>Current live view:</strong> ${best?best[0]:'No ranking'} leads the tracked liquidity destinations with a score of <span class="${best?cls(best[1]):'neu'}">${best?best[1]:'—'}</span>. ${positives.length?'<span class="pos">Positive: '+positives.join('; ')+'.</span>':''} ${cautions.length?'<span class="neg">Watch: '+cautions.join('; ')+'.</span>':''} The weakest tracked destination is ${worst?worst[0]:'unavailable'}. Forecast ranges remain estimates.`;
 $('news').innerHTML=(d.news||[]).slice(0,6).map(n=>`<a href="${n.url}" target="_blank" rel="noopener"><strong>${n.title}</strong><div class="newsmeta">${n.source||'News source'} ${n.date?'• '+n.date:''}</div></a>`).join('')||'<div class="small">No live headlines available in the latest refresh.</div>';const age=(Date.now()-new Date(d.generatedAt).getTime())/60000;$('fresh').textContent=Number.isFinite(age)?(age<90?Math.round(age)+' min old':'Stale: '+Math.round(age/60)+'h'):'Waiting';$('fresh').className='badge '+(age<90?'pos':age<240?'neu':'neg');const stamp=new Date(d.generatedAt).toLocaleString('en-AU',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});$('lastUpdated').textContent='Last updated: '+stamp;$('footerUpdated').textContent='Last updated: '+stamp}
-async function loadData(){try{const r=await fetch('data/live.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error(r.status);DATA=await r.json();render()}catch(e){$('fresh').textContent='Feed error';$('fresh').className='badge neg';$('summary').textContent='The live data file could not be loaded. Run the GitHub Action or check repository permissions.'}}
+async function getJson(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error(r.status);return r.json()}
+async function browserFallback(){
+  const results=await Promise.allSettled([
+    getJson('https://api.exchange.coinbase.com/products/BTC-USD/ticker'),
+    getJson('https://api.kraken.com/0/public/Ticker?pair=XBTUSD'),
+    getJson('https://www.bitstamp.net/api/v2/ticker/btcusd/'),
+    getJson('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'),
+    getJson('https://api.frankfurter.app/latest?from=USD&to=AUD'),
+    getJson('https://api.alternative.me/fng/?limit=2&format=json'),
+    getJson('https://stablecoins.llama.fi/stablecoincharts/all')
+  ]);
+  const src=[];
+  const add=(name,v)=>{v=Number(v);if(Number.isFinite(v)&&v>1000&&v<1000000)src.push({name,usd:v})};
+  if(results[0].status==='fulfilled')add('Coinbase',results[0].value.price);
+  if(results[1].status==='fulfilled'){const row=Object.values(results[1].value.result||{})[0];if(row)add('Kraken',row.c?.[0])}
+  if(results[2].status==='fulfilled')add('Bitstamp',results[2].value.last);
+  let cg24=0;if(results[3].status==='fulfilled'){add('CoinGecko index',results[3].value.bitcoin?.usd);cg24=Number(results[3].value.bitcoin?.usd_24h_change)||0}
+  if(!src.length)throw Error('No browser price source available');
+  const vals=src.map(x=>x.usd).sort((a,b)=>a-b),med=vals[Math.floor(vals.length/2)],kept=src.filter(x=>Math.abs(x.usd/med-1)<0.025);
+  const btcUsd=kept.reduce((a,b)=>a+b.usd,0)/kept.length;
+  const usdAud=results[4].status==='fulfilled'?Number(results[4].value.rates?.AUD):1.43;
+  let fg={value:50,label:'Neutral',change24h:0};if(results[5].status==='fulfilled'){const a=results[5].value.data||[];fg={value:Number(a[0]?.value)||50,label:a[0]?.value_classification||'Neutral',change24h:(Number(a[0]?.value)||50)-(Number(a[1]?.value)||50)}}
+  let stable={marketCapUsd:null,change1d:null,change7d:null,change30d:null};if(results[6].status==='fulfilled'){const pts=(results[6].value||[]).map(x=>[Number(x.date),Number(x.totalCirculatingUSD?.peggedUSD)]).filter(x=>x[0]&&x[1]).sort((a,b)=>a[0]-b[0]);if(pts.length){const now=pts.at(-1),near=d=>pts.reduce((a,b)=>Math.abs(b[0]-(now[0]-d*86400))<Math.abs(a[0]-(now[0]-d*86400))?b:a);const pct=(a,b)=>(a/b-1)*100;stable={marketCapUsd:now[1],change1d:pct(now[1],near(1)[1]),change7d:pct(now[1],near(7)[1]),change30d:pct(now[1],near(30)[1])}}}
+  const sentiment=Math.round(fg.value),stableScore=Math.max(0,Math.min(100,50+(stable.change7d||0)*8)),macroScore=50,onchainScore=50,etfScore=50;
+  const btcScore=Math.round(.22*etfScore+.20*macroScore+.18*onchainScore+.20*sentiment+.20*stableScore);
+  return {generatedAt:new Date().toISOString(),status:'Direct browser fallback',btc:{usd:btcUsd,aud:btcUsd*usdAud,change24h:cg24,method:'filtered live exchange average',sources:kept},fx:{usdAud,audUsd:1/usdAud},fearGreed:fg,stablecoins:stable,etf:{status:'unavailable',dailyUsdMillions:null,score:50},macro:{score:macroScore},onchain:{score:onchainScore},liquidityScores:{'Bitcoin & digital assets':btcScore,'Gold & precious metals':55,'US AI & technology equities':55,'Silver':52,'Emerging markets':50},news:[]};
+}
+async function loadData(){
+  try{
+    const r=await fetch('data/live.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw Error(r.status);
+    const d=await r.json();
+    if(!d?.btc?.usd)throw Error('Snapshot not populated');
+    DATA=d;render();
+  }catch(primaryError){
+    try{DATA=await browserFallback();render();$('fresh').textContent='Live direct';$('fresh').className='badge pos';$('status').textContent='DIRECT';$('status').className='pos'}
+    catch(fallbackError){$('fresh').textContent='Feed error';$('fresh').className='badge neg';$('summary').textContent='Live feeds could not load. Check internet access, then run the GitHub Action once from the repository Actions tab.'}
+  }
+}
 setCur(CUR);loadData();setInterval(loadData,15*60000);if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js');
 </script></body></html>

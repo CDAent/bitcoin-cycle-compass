@@ -1,4 +1,4 @@
-BITCOIN CYCLE COMPASS VERSION 6
+BITCOIN CYCLE COMPASS VERSION 6.2
 
 FILES TO UPLOAD
 Upload the complete contents of this package to the root of your existing GitHub repository, including the hidden .github folder.
