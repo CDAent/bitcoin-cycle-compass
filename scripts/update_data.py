@@ -181,6 +181,18 @@ def etf_flow():
         return {'status':'live','source':'Farside','sourceUrl':source,'dailyUsdMillions':latest['usdMillions'],'date':latest['date'],'fiveDayUsdMillions':last5,'twentyDayUsdMillions':last20,'flowScore':flow_score,'proxy':proxy,'score':combined,'scoreSource':'confirmed flow + ETF demand proxy'}
     return {'status':'proxy only','dailyUsdMillions':None,'fiveDayUsdMillions':None,'twentyDayUsdMillions':None,'proxy':proxy,'score':proxy.get('score',50),'scoreSource':'ETF demand proxy only'}
 
+
+def weekly_btc_history():
+    url='https://query1.finance.yahoo.com/v8/finance/chart/BTC-USD?range=4y&interval=1wk&events=history'
+    d=jget(url)['chart']['result'][0]
+    ts=d.get('timestamp',[])
+    closes=d.get('indicators',{}).get('quote',[{}])[0].get('close',[])
+    rows=[]
+    for t,c in zip(ts,closes):
+        if c is None: continue
+        rows.append({'week':datetime.utcfromtimestamp(int(t)).strftime('%Y-%m-%d'),'usd':round(float(c),2)})
+    return rows[-208:]
+
 def news():
     queries=[
       'bitcoin markets when:3d',
@@ -275,6 +287,6 @@ def main():
       'Other':0,
     }
     live_news=safe(news,[]) or previous.get('news',[]) or []
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'proxies':proxies,'news':live_news,'events':events()}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':safe(weekly_btc_history,[]) or [],'proxies':proxies,'news':live_news,'events':events()}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()

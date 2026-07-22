@@ -67,3 +67,13 @@ VERSION 7.5 TREND COLOUR UPDATE
 - Global Liquidity detail page now shows trend arrows and labels.
 - Added liquidityTrends to scheduled and browser-fallback data.
 - Fixed the undefined stable_change updater reference.
+
+
+VERSION 8.0 COMPASS AI ANALYST AND WEEKLY HISTORY
+- Added Compass Ai Analyst with free-text questions and six quick prompts.
+- Analyst interprets current dashboard metrics and available weekly history.
+- History & Trends now uses weekly records with 3-month, 6-month, 1-year,
+  2-year and 4-year views.
+- Added up to 208 weekly Bitcoin records from a four-year market feed.
+- Local dashboard snapshots are stored weekly instead of daily.
+- Global Liquidity uses separate Destination, Allocation and Trend columns.
