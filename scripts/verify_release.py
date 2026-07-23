@@ -47,10 +47,11 @@ def main():
     for marker, label in [
         ('id="sideRefresh"', 'refresh buttons exist (sidebar)'),
         ('id="topRefresh"', 'refresh buttons exist (dashboard header)'),
-        ('id="detailRefresh"', 'refresh buttons exist (subpage header)'),
+        ('id="settingsRefresh"', 'refresh button exists in Settings'),
         ('class="mobile-header-logo"', 'mobile logo exists'),
         ('id="mobileMenuBtn"', 'hamburger open button exists'),
         ('id="mobileDrawerClose"', 'hamburger close button exists'),
+        ('id="detailMenuBtn"', 'index selector exists in page header'),
         ('data-view="history"', 'History view exists'),
         ('data-view="reports"', 'Reports view exists'),
         ('data-view="news"', 'Market News view exists'),
@@ -64,6 +65,7 @@ def main():
     ids = re.findall(r'id="([^"]+)"', index_text)
     duplicate_ids = [item for item, count in Counter(ids).items() if count > 1]
     check(not duplicate_ids, 'no duplicate IDs (including currency selectors)', failures)
+    check('id="detailClose"' not in index_text, 'no per-page close X button remains', failures)
 
     obsolete_hits = []
     obsolete_pattern = re.compile(r'8\.5\.0-s1(?!\.3)')

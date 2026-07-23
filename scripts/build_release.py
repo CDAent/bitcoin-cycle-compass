@@ -71,7 +71,7 @@ def validate_release_files():
         else:
             ok = fail(f'Missing required asset: {asset}') and ok
 
-    required_controls = ['id="sideRefresh"', 'id="topRefresh"', 'id="detailRefresh"', 'id="mobileMenuBtn"']
+    required_controls = ['id="sideRefresh"', 'id="topRefresh"', 'id="settingsRefresh"', 'id="mobileMenuBtn"', 'id="detailMenuBtn"']
     for marker in required_controls:
         if marker in index_text:
             pass_msg(f'UI control exists: {marker}')

@@ -18,7 +18,6 @@ def test_refresh_controls_exist():
     html = _read('index.html')
     assert 'id="sideRefresh"' in html
     assert 'id="topRefresh"' in html
-    assert 'id="detailRefresh"' in html
     assert 'id="settingsRefresh"' in html
 
 
@@ -27,6 +26,8 @@ def test_mobile_logo_and_hamburger_exist():
     assert 'class="mobile-header-logo"' in html
     assert 'id="mobileMenuBtn"' in html
     assert 'id="mobileDrawerClose"' in html
+    assert 'id="detailMenuBtn"' in html
+    assert 'id="detailClose"' not in html
 
 
 def test_feedback_support_is_settings_widget_not_nav_view():
