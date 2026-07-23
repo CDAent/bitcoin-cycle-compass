@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-07-23T02:24:28.621913+00:00",
+  "generatedAt": "2026-07-23T07:00:31.421199+00:00",
   "status": "Live scheduled research snapshot",
-  "appVersion": "8.5.0-s1",
+  "appVersion": "8.5.0-s1.3",
   "btc": {
-    "usd": 65695.72,
-    "aud": 93938.31002799999,
-    "change24h": -1.0623223164240112,
+    "usd": 65745.1425,
+    "aud": 94008.97926075,
+    "change24h": -0.22033849772661288,
     "method": "trimmed average / median check",
     "sources": [
       {
         "name": "Coinbase",
-        "usd": 65689.99
+        "usd": 65733.9
       },
       {
         "name": "Kraken",
-        "usd": 65693.3
+        "usd": 65754.5
       },
       {
         "name": "Bitstamp",
-        "usd": 65688.59
+        "usd": 65741.17
       },
       {
         "name": "CoinGecko index",
-        "usd": 65711.0
+        "usd": 65751.0
       }
     ]
   },
@@ -36,79 +36,79 @@
     "change24h": -2.0
   },
   "stablecoins": {
-    "marketCapUsd": 307402711828.19,
-    "change1d": 0.334305984456873,
-    "change7d": 0.44364138859456226,
-    "change30d": -1.7448558796128166
+    "marketCapUsd": 307365264205.59,
+    "change1d": 0.3220833166671433,
+    "change7d": 0.43140540162842633,
+    "change30d": -1.7568252650930094
   },
   "etf": {
     "status": "live",
     "source": "Farside",
     "sourceUrl": "https://farside.co.uk/bitcoin-etf-flow-all-data/",
-    "dailyUsdMillions": 30.3,
+    "dailyUsdMillions": 69.1,
     "date": "2026-07-22",
-    "fiveDayUsdMillions": 671.7,
-    "twentyDayUsdMillions": -1398.1000000000001,
-    "flowScore": 52,
+    "fiveDayUsdMillions": 710.5,
+    "twentyDayUsdMillions": -1359.3,
+    "flowScore": 55,
     "proxy": {
       "status": "live proxy",
       "score": 40,
       "label": "Weak demand",
-      "return1d": -0.8593184374895655,
-      "volumeVs20d": 0.5062150828721651,
-      "aggregateDollarVolumeUsd": 1081534158.5527039,
+      "return1d": -0.8593687512471556,
+      "volumeVs20d": 0.50908793449948,
+      "aggregateDollarVolumeUsd": 1087747680.5900574,
       "funds": [
         {
           "ticker": "IBIT",
           "close": 37.34000015258789,
           "return1d": -0.8760234467690253,
-          "volume": 23152998.0,
-          "volumeVs20d": 0.5139901673292882,
-          "dollarVolumeUsd": 864532948.8528671
+          "volume": 23300200.0,
+          "volumeVs20d": 0.5171735090021268,
+          "dollarVolumeUsd": 870029471.5553284
         },
         {
           "ticker": "FBTC",
           "close": 57.380001068115234,
           "return1d": -0.7781441270814593,
-          "volume": 1706610.0,
-          "volumeVs20d": 0.39015447543951276,
-          "dollarVolumeUsd": 97925283.62285614
+          "volume": 1709200.0,
+          "volumeVs20d": 0.39073501709980063,
+          "dollarVolumeUsd": 98073897.82562256
         },
         {
           "ticker": "ARKB",
           "close": 21.860000610351562,
           "return1d": -0.8166982654205346,
-          "volume": 670756.0,
-          "volumeVs20d": 0.3771602245521322,
-          "dollarVolumeUsd": 14662726.569396973
+          "volume": 674300.0,
+          "volumeVs20d": 0.3791152104305878,
+          "dollarVolumeUsd": 14740198.411560059
         },
         {
           "ticker": "BITB",
           "close": 35.779998779296875,
           "return1d": -0.8039947823147764,
-          "volume": 554229.0,
-          "volumeVs20d": 0.37659064615313115,
-          "dollarVolumeUsd": 19830312.943450928
+          "volume": 555500.0,
+          "volumeVs20d": 0.3774379741330987,
+          "dollarVolumeUsd": 19875789.321899414
         },
         {
           "ticker": "GBTC",
           "close": 51.08000183105469,
           "return1d": -0.7962707983044659,
-          "volume": 1122309.0,
-          "volumeVs20d": 0.6561904093421869,
-          "dollarVolumeUsd": 57327545.775009155
+          "volume": 1122600.0,
+          "volumeVs20d": 0.6563549672436424,
+          "dollarVolumeUsd": 57342410.05554199
         },
         {
           "ticker": "BTC",
           "close": 29.139999389648438,
           "return1d": -0.8168814771058797,
-          "volume": 935324.0,
-          "volumeVs20d": 0.5248728227567973,
-          "dollarVolumeUsd": 27255340.789123535
+          "volume": 950100.0,
+          "volumeVs20d": 0.5329436709783816,
+          "dollarVolumeUsd": 27685913.42010498
         }
       ]
     },
-    "score": 49,
+    "score": 51,
     "scoreSource": "confirmed flow + ETF demand proxy"
   },
   "macro": {
@@ -151,8 +151,8 @@
         "change30d": -41.40425201540246
       },
       "mempool-size": {
-        "latest": 34883774.5,
-        "change30d": 8824.077949321429
+        "latest": 34626766.0,
+        "change30d": 6579.359084284873
       }
     }
   },
@@ -162,7 +162,7 @@
     "Global equities": 59,
     "AI technology": 61,
     "Emerging markets": 51,
-    "Bitcoin": 43,
+    "Bitcoin": 44,
     "Stablecoins": 59,
     "Gold": 60,
     "Silver": 51
@@ -173,8 +173,8 @@
     "Global equities": 0.0,
     "AI technology": 0.0,
     "Emerging markets": 0.0,
-    "Bitcoin": -1.0623223164240112,
-    "Stablecoins": 0.44364138859456226,
+    "Bitcoin": -0.22033849772661288,
+    "Stablecoins": 0.43140540162842633,
     "Gold": 0.0,
     "Silver": 0.0,
     "Other": 0
@@ -1217,8 +1217,8 @@
     },
     {
       "week": "2026-07-20",
-      "usd": 65695.72,
-      "aud": 93938.31
+      "usd": 65745.14,
+      "aud": 94008.98
     }
   ],
   "historyDaily": [
@@ -8534,10 +8534,27 @@
     },
     {
       "day": "2026-07-23",
-      "usd": 65695.72,
-      "aud": 93938.31
+      "usd": 65745.14,
+      "aud": 94008.98
     }
   ],
+  "reports": {
+    "status": "available",
+    "sections": [
+      {
+        "title": "Cycle posture",
+        "summary": "Macro 61 / On-chain 20 / ETF 51"
+      },
+      {
+        "title": "Liquidity focus",
+        "summary": "Cash & short-term bills: 62, AI technology: 61, Gold: 60"
+      },
+      {
+        "title": "Trend watch",
+        "summary": "Global equities: 0.0%, Bitcoin: -0.22%, Stablecoins: 0.43%"
+      }
+    ]
+  },
   "proxies": {
     "gold": {
       "change20d": 0
@@ -8563,7 +8580,22 @@
   },
   "news": [
     {
-      "title": "Crypto's Most Active Bear Market Ever - Livewire Markets",
+      "title": "Strategy Q2 26 earnings preview: mNAV recovery, Bitcoin yield slows - ig.com",
+      "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxQWlhCdjdfZnRaWENzSFkyRzJydlI2LWJDbHZmQjRzdUxEaTA4Y05Pb3BjZHdYbG44UHFieU0xV1A5WkY2MldUQzNoNjFtbFFBTUt1MnY5cjh1Sm9uTVhvN3FfOW5BcVZneFotUUVKRXBFU0wtOWxHMUVBQUg1SkVSbmw1MFlCOFNxaW9SSDFhbU9nMllIakt6clRZcVZEc1NFdHZ6a1B3V1lFRVFqLW8xbGdHc3I?oc=5",
+      "source": "ig.com",
+      "date": "Thu, 23 Jul 2026 03:33:07 GMT",
+      "impactScore": 43,
+      "stars": 2,
+      "impact": "Neutral",
+      "tags": [
+        "Equities",
+        "AI Technology",
+        "Bitcoin"
+      ],
+      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
+    },
+    {
+      "title": "Crypto's most active bear market ever - Livewire Markets",
       "url": "https://news.google.com/rss/articles/CBMigAFBVV95cUxPZ0M1UUxscGVqY2FwLVlNdXh4elFDV08wV05vUUVfdm5sakFqdG84eXd6aERqcFdGUDFfX056bTRIUkJhV2hneDVaSDQwOHpyaWMtNWE3N2tXSkJtOGRkbVE3VHgzZzdTdEkyeDBSTHFsUEVnYzE0R25qQS0wX2ZEdA?oc=5",
       "source": "Livewire Markets",
       "date": "Wed, 22 Jul 2026 21:57:19 GMT",
@@ -8584,6 +8616,34 @@
       "stars": 2,
       "impact": "Neutral",
       "tags": [
+        "Bitcoin"
+      ],
+      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
+    },
+    {
+      "title": "Crypto Market Overview: Bitcoin recovery eases \u2013 HBAR and LDO test key resistance zones - FXStreet",
+      "url": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxNeU04cmtlSVA1MHRwX3NXdzZjQl9SSE5jTDh6bnN4dlZQMVVhbVAyNmZwMnNDTzZRTXFqQVEwWHhXeFFJNTkyNERTWUk0MnJSSFpoOHdBekZNb05oWE4zUWQyV2pmYk1UekdEUVU4YTZZVWxQZldkcjNnbDBhSDEwZExjVkVHZWZ2alJXUWRvMGpvNkNPUDdjb0xqaVY2VDAtTUdjLXRZREtaVzdJUDdoQzNoREpmZzh0U0tEaWNwQXhESnZJckJWRkZqVEZWcFdxZWtoanVkTjVkOFRT?oc=5",
+      "source": "FXStreet",
+      "date": "Thu, 23 Jul 2026 03:46:51 GMT",
+      "impactScore": 30,
+      "stars": 2,
+      "impact": "Neutral",
+      "tags": [
+        "Bitcoin"
+      ],
+      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
+    },
+    {
+      "title": "Bitcoin wilts as oil and rates rise. Clarity Act odds tumble to 38% - LCX Exchange",
+      "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPOGdrQVhFeTB2VDJIRjVfWXZabVRzNjNIbTN3MWxTRjhJeEdoWXFQbTJycEFyVHI1NTQybXZFaGlDR2FpTlMyM2FhWHlGa1VybG5GQ0ZicEtDdHZaRnZVcnFJWTNSUXRqVUw2V2dJdm5SWHFRUENCVXR2UnphMG9IRndMdVRFVEpnRnZDellUajdxVGZjcXpDQlFlOA?oc=5",
+      "source": "LCX Exchange",
+      "date": "Thu, 23 Jul 2026 04:46:23 GMT",
+      "impactScore": 48,
+      "stars": 3,
+      "impact": "Neutral",
+      "tags": [
+        "Commodities",
+        "Macro",
         "Bitcoin"
       ],
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
@@ -8612,6 +8672,19 @@
       "tags": [
         "Commodities",
         "Macro",
+        "Bitcoin"
+      ],
+      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
+    },
+    {
+      "title": "The Case for Bitcoin at $72,000 Just Got Stronger, but Here Is Where It Fails - Mitrade",
+      "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOOTA3bGQwaHVjUnN6OWV5cnZaRjNKOXdNU3YtQW9uWVlJYkphNFFUUjNyTk5GTTNGbjhXQzV4Y2l3TVZ2QXNUOTRJVFdOUkpNNlZod1FkTUVDNndRZC14YjhGU0FTaEtrR292aVlGOFZKLTE4b05pQTFUTXpSQVdOUTVLby1OZXhQ?oc=5",
+      "source": "Mitrade",
+      "date": "Thu, 23 Jul 2026 02:47:51 GMT",
+      "impactScore": 30,
+      "stars": 2,
+      "impact": "Neutral",
+      "tags": [
         "Bitcoin"
       ],
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
@@ -8656,6 +8729,33 @@
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
     },
     {
+      "title": "Bitcoin is a Bubble? Anthony Pompliano Will Host His 'Crazy Uncle' Peter Schiff to Give Him the 'Intellectual Beatdown He Deserves' - Yahoo Finance UK",
+      "url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNeEVvM3VoNE9ENGhOUktOcDBjV0JCY0JLNE5FSzc0NXYxaEVPRHFJa2xvOTUwdkVSUmhzcTViVzlodVlGNkxEem1VOFZEcmphYzFmLVFrZVFsUzY3a29VMk1zNktTc293TXR3VTdxRkl3ZDg2YXE1RWtxRUNrTU4wSy1CSHhQNWZwNnJXTVZwVQ?oc=5",
+      "source": "Yahoo Finance UK",
+      "date": "Thu, 23 Jul 2026 06:35:00 GMT",
+      "impactScore": 30,
+      "stars": 2,
+      "impact": "Neutral",
+      "tags": [
+        "Bitcoin"
+      ],
+      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
+    },
+    {
+      "title": "Bitcoin Falls; Inflow Into Bitcoin ETFs in Focus -- Market Talk - Moomoo",
+      "url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPY2c1a0hCbkw2RHhmbnhhYzFZMHBWTk1XMEtsWjIxQl8wekNHeHd2V3phbEVHOHp0eEY4TlFCNWI5dWlXeVdRQjBoMWg5aTFvRkhNQm5RSHk3bHMzM2I5ZDJuQVVBd2NTR0RvLXNnb3hkcHJsbVVmQnVBVkNnZmQyTzJyNlRzNXFIZUFIeHY1Q3JEdjdxRHdCeEdmdmRsRjg1N3FV?oc=5",
+      "source": "Moomoo",
+      "date": "Thu, 23 Jul 2026 03:02:37 GMT",
+      "impactScore": 55,
+      "stars": 3,
+      "impact": "Neutral",
+      "tags": [
+        "Bitcoin",
+        "Institutional"
+      ],
+      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
+    },
+    {
       "title": "Bitcoin holds its upside case while exit signals build across the market - KITCO",
       "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQNHh6eUUzVUtOcVpUaGh1YWpMamZ3UmJaTXJkWTJJZmFSNWVIaFJDeGZoZEVtUmV3TW5WUVdtQkpSQWQtLWxKazhLYUlQcG03SkNzRnhCU1BLeXRqa3Foell5dnF1d3BZaUpxclZ0UFAwSkp2TERxZWdOcjZ4RFlRdmN4S2dscjJQa0YzTjQyUjlGdHMzMEk0RmNPSE9qQ0VjZk1sS0tRVEVka055R1E?oc=5",
       "source": "KITCO",
@@ -8682,77 +8782,10 @@
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
     },
     {
-      "title": "Strategy Q2 26 earnings preview: mNAV recovery, Bitcoin yield slows - ig.com",
-      "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxQQmxmM3FON2loZVM3R2gwVUdydE9EN09XdkNtYmZlNDhaS2g4RjBZR3dUUHNZMkVwaVNQQjRBNkJwazBPemhZOWtzZnUxZ3Y4R2RIODF2TzFrR1ZJRzZSQmtmb0RZb255NVduVERPdGNOMC1YUzdySTU5OTBsTWk2ZHUzWUlLZl9Od1AxZ1EyLUxIUQ?oc=5",
-      "source": "ig.com",
-      "date": "Thu, 23 Jul 2026 02:12:36 GMT",
-      "impactScore": 43,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Equities",
-        "AI Technology",
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "Webcast: Rewriting the Playbook: Bitcoin's Next Move and What the Market Is Signaling - ETF Trends",
-      "url": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNTllkOTNIQUs1TWIxUmROTWc4N2RfRkg3amE2N3VQOWpiMkRtUGVoVjNCWHdQQy0ya3Bfal9QN1REY0tYYXRSNUQ2dmhnYzYtZlF4eWFKQndkTk9pM0J2NE5mQm8zTnpsSmNSa0xucXdJZFlNQTZPeHRnVmNNZlNfMF8wanM4dVZGZTZ6OTRiZVdXaUlPT0RtWFhUWnhPWnhKNEU5bTFEWU9GeHpvLUFiQng0SHRYYWJDb2RWcnZXd0d2VjF1S1gzeA?oc=5",
-      "source": "ETF Trends",
-      "date": "Wed, 22 Jul 2026 23:20:29 GMT",
-      "impactScore": 30,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "Hyperliquid, Robinhood could lead crypto\u2019s next bull market as DeFi and TradFi converge - FXStreet",
-      "url": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxOelFIc1ZvY0h4WXJVYkJoUmlIUzUxamh1dk5aVmtWYnlLOXpyd1YwZGNILVZSOFBfRC1rRUlTZmNQNXRvZ29vX0t5Q3VsZlJ3MkRDV1FwMVNyY2ZMNW9Uc2NER0llc3pzUmdldUtqQ1F5VTFEbWlxam8zYUNCeWhfRVB6MUhJaHpNN1lyanhFaXNXOVkwdmhpS0xBdTBMVnlBUWJJTW0yX1otNHplVnZXUFhYcWF0cXlKMThoQWxNckVuNng0TllkWnFrYVRqaU1pSzFGNGtJZW52UERhdUE?oc=5",
-      "source": "FXStreet",
-      "date": "Wed, 22 Jul 2026 21:40:34 GMT",
-      "impactScore": 30,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "USD/JPY, Gold and Bitcoin Forecasts \u2013 Rising Yields Drive Market Inflections - FXEmpire",
-      "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxNZWVZdU9yZzFCT2tmZzBRMTBuMU9OQnJJMHgwWE9POTZQZldwS25ORjVvSHFvQlVQMEtFQWx3MV8tYjV5QVV1WlRsSEI0Rm5TalFWYzZTTHR0UGZid05yRURmX1p3X3lHUVNIYm80aWdqelFISUJRN05Yc051SEIyS3pFQmJSRXpIV1ZyS2pFVlh3UFVJaExpajBsVE9pcFRTbGtXYU0tcENCZkhpakVDR1I3Nlg0TFZUZnBLZFFlcnVHTUZ0eHRMWnFuLVg?oc=5",
-      "source": "FXEmpire",
-      "date": "Wed, 22 Jul 2026 13:02:00 GMT",
-      "impactScore": 30,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "Bitcoin And Crypto Markets Experience Third Straight Quarter Of Price Declines - Crowdfund Insider",
-      "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxOMjlSM2ppeHhyY1VhT29OcThUOHJNS1lScUpkNGRXNmU4S2E4aDUzd0RuMjhqbXdsaFR1WWJSRlVNY0I1SXFsSF9xbDY4MHpMTXNVYU1Oa2tIS1VHVlhvVjdwdjk5RThWbGRUcGVNeU9IcUlhSnM3OVhQMWtOZXI0QnpfZmc4NTBNbUNEdm91X0ZPNW9xdVFYcXNJdFotaFZKRjNqZVNHcnVLbW92S3VRejNYODVhbENSaHp4bXk3QUdnWjJvdWc?oc=5",
-      "source": "Crowdfund Insider",
-      "date": "Wed, 22 Jul 2026 12:22:38 GMT",
-      "impactScore": 30,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "Kraken Parent Company Makes Moves to Offer xStocks From Global Markets - Decrypt",
-      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE0tRnBIbHlJUjcxVUlLQjJDQ3llSjZGbEtSU0c5djJiUXIyYXphbE1yWWp6cHJDYXhhVXN0RVRkRmpnSktaUVQ0aDU2T3h2enI1Sjk4N1ZPenk2aWtPZkdidlBOekVsNzJQTVdtNDdRdWRZdmZK0gF8QVVfeXFMTUFBbnRobFRaWENHeUFWOFVnZVV5NmxYdDcwWVVCbGR1bC1oWEtCZzJMUi1zOHFubXloSG1fSFlUYWdaMjFsckk0Wmt1SEFqRHZGVTFSTWVJRUdhQlFlOFBldzU5TldQSUZidGF2WkowSWtTYXZvZ2VxNVN5Rg?oc=5",
-      "source": "Decrypt",
-      "date": "Wed, 22 Jul 2026 20:07:34 GMT",
+      "title": "BTC wilts as Clarity Act odds tumble. U.S. deploys B1 bomber against Iran - CoinDesk",
+      "url": "https://news.google.com/rss/articles/CBMirgFBVV95cUxPVDN1dHlrTzAtMGxmLTIyTWpHSng0enk4aWZrOFVhSjJUbnVrcGpyY3Z2VVFXS3ZNMVBnT2xtX0RySWNtZWZmY3JPZjlCNlRQRTNkMUhUUGQ1cWFKNDQ1WGlMMHQwenhyQ3ZzeC00UUlURXJMWVlmMXQzQ2tCZW51cTdSZVp0UUNvQkE2bjVub05OcVg3QnFfU2ltUXVlandHMkhDY2ZHb1Z1azkzSmc?oc=5",
+      "source": "CoinDesk",
+      "date": "Thu, 23 Jul 2026 03:54:09 GMT",
       "impactScore": 18,
       "stars": 1,
       "impact": "Neutral",
@@ -8776,36 +8809,21 @@
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
     },
     {
-      "title": "Balance Stablecoin Collapses After Bitcoin Vault Is Drained - Yahoo Finance",
-      "url": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPV0tQNW1zUE0yaEprajhJZ2wyNlF5cnNEYTVRSVRUc1Vma3JVZWt5N0NTcDFSRHhsS2pkWkFsbG1NZ1E2TlZPTXhqY3lNa1cxMFdwVGIySU5FamlibHQ5UWxKOU13QkludWgtb1IxakdiR3NsTnluYXF5N0txM2t0dDd4aUlMd2xONFFEakRIQUZvbmg5T0RqWnZfNjFabFVXdHRKN1ZtRjhDQU0?oc=5",
-      "source": "Yahoo Finance",
-      "date": "Wed, 22 Jul 2026 15:42:00 GMT",
-      "impactScore": 30,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "Tesla Holds Bitcoin Position Steady as Digital Asset Loss Reaches $112M - Yahoo Finance",
-      "url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPcVVCdWUtaVZkWHVHQVhuVE9VSWFvYmk4c1JMNkx2ZGtkYUZJZ3ByN0ZyXzBoa3JkcG9GMXFiOXRZTmxPMTZtZTVGZXhybXFsWUtWaXdpRTByUDhBbU9tNTdlUXZEMm42SW82R3V0TDZYYkNCcUh5MXU3ZEs3SmhZbWpfYlliSi1QYnBTa3cwcUUza05MRDBlNzd5aEFZVnBqTmc?oc=5",
-      "source": "Yahoo Finance",
-      "date": "Wed, 22 Jul 2026 23:17:00 GMT",
-      "impactScore": 30,
-      "stars": 2,
-      "impact": "Neutral",
-      "tags": [
-        "Bitcoin"
-      ],
-      "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
-    },
-    {
-      "title": "Bitcoin Is Bouncing: Here\u2019s the Bull and Bear Case for Its Next Move - Decrypt",
-      "url": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBzUmdDWVFJY0VrdjRxdklsOWxhNFotYVctanFXeHV2R1hpZ1RZR2phX1hCZFktaEFYX3NDN0J2RTAtVXp3SzR3clljZ2FNdU4wUm82ZVhCR0tabXRZb0c1cmMxczB5YkNVU2xUVFRR0gF2QVVfeXFMTjFtU245d0JqWG02VjNUMUt1LVlPUEl1Yi02TG9YbUw1ZHoyZFZOLXA1S0lzN1lKUkR6Zl9sQWtvY2NsZFZZaWR2al9TUWVlOUV5TlB6cThXaFYtc3ItNzlYNk5OS2NKZl9RQ2VTNzQ3MEdBcWlKQQ?oc=5",
+      "title": "Kraken Parent Company Makes Moves to Offer xStocks From Global Markets - Decrypt",
+      "url": "https://news.google.com/rss/articles/CBMidEFVX3lxTE0tRnBIbHlJUjcxVUlLQjJDQ3llSjZGbEtSU0c5djJiUXIyYXphbE1yWWp6cHJDYXhhVXN0RVRkRmpnSktaUVQ0aDU2T3h2enI1Sjk4N1ZPenk2aWtPZkdidlBOekVsNzJQTVdtNDdRdWRZdmZK0gF8QVVfeXFMTUFBbnRobFRaWENHeUFWOFVnZVV5NmxYdDcwWVVCbGR1bC1oWEtCZzJMUi1zOHFubXloSG1fSFlUYWdaMjFsckk0Wmt1SEFqRHZGVTFSTWVJRUdhQlFlOFBldzU5TldQSUZidGF2WkowSWtTYXZvZ2VxNVN5Rg?oc=5",
       "source": "Decrypt",
-      "date": "Wed, 22 Jul 2026 18:48:45 GMT",
+      "date": "Wed, 22 Jul 2026 20:07:34 GMT",
+      "impactScore": 18,
+      "stars": 1,
+      "impact": "Neutral",
+      "tags": [],
+      "why": "This story may affect market expectations, but its broader financial impact has not yet been confirmed."
+    },
+    {
+      "title": "Tesla holds bitcoin treasury steady, reports $112M impairment loss - CoinDesk",
+      "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxNTC1jQWF6dFNlaUhsQ3BmcVZ2ZEhYQnNJWUw2TWgzSGVZa0dCSGxRYnVzRFdSWmFLQUFlcklCczc3MjVKdElEUkZxLVRPa2FUb3pGVFZJRUJycGxkQTc5VzctMGFWdm93clpZX014M1FDNmIwZGx1aWEwMXZrQkg2enhEbEJQOE1XZHE3ejJHSkxYbDZVWC1nXzVxTENsU1RUSGdwVQ?oc=5",
+      "source": "CoinDesk",
+      "date": "Wed, 22 Jul 2026 20:43:46 GMT",
       "impactScore": 30,
       "stars": 2,
       "impact": "Neutral",
@@ -8815,10 +8833,10 @@
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
     },
     {
-      "title": "Current price of Bitcoin for July 22, 2026 - Fortune",
-      "url": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9vR2pkU19MZ0NpXzdEcGFXeExvYldUQ18wLW90Q0dEd1BKTjdTMUYwYllkeXdPOXFsR1VWQTV4SjNGTG9qb0hfTjhrSUdVOEx2YW81Tkx4T0RuSFFJcFFCUkFsOVBsdms?oc=5",
-      "source": "Fortune",
-      "date": "Wed, 22 Jul 2026 15:05:30 GMT",
+      "title": "Peter Brandt Predicts Bitcoin Bear Market Bottom Still Lies Ahead - Crypto News Australia",
+      "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOeURFR0tkVV9GUHFOdDYtZU9tWEs1VjczZUlBQjI3TV95bGpxcWZaQVZTMzk0Ql94QWVBVDBCV3JmLU52MkFlWjFidUEwbTFCSkl2M20tcVRTQS1QVzJucXkzRzVKVjktNW00dm1PSUhFQ0V6cjZjSk92R051SXhOZU00UE42NlJpTHdrOHdGZGl2V0pwSlFIYVc1OUV0QUxMOXZlU19CSQ?oc=5",
+      "source": "Crypto News Australia",
+      "date": "Tue, 21 Jul 2026 08:38:04 GMT",
       "impactScore": 30,
       "stars": 2,
       "impact": "Neutral",
@@ -8855,11 +8873,11 @@
     }
   ],
   "buildMeta": {
-    "appVersion": "8.5.0-s1",
-    "sprint": "1",
-    "gitCommit": "9848e74",
-    "buildDate": "2026-07-23T02:24:28Z",
+    "appVersion": "8.5.0-s1.3",
+    "sprint": "1.3",
+    "gitCommit": "41be8d0",
+    "buildDate": "2026-07-23T07:00:31Z",
     "databaseVersion": "2",
-    "lastSuccessfulUpdate": "2026-07-23T02:24:28Z"
+    "lastSuccessfulUpdate": "2026-07-23T07:00:31Z"
   }
 }

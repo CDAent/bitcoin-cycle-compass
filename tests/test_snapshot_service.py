@@ -54,7 +54,7 @@ def _seed_snapshot(db_path, d, overrides=None):
         'aud_usd': 0.65, 'aud_usd_quality': 'live',
         'macro_score': 55, 'onchain_score': 60, 'btc_score': 58,
         'scores_quality': 'live',
-        'updater_version': '8.5.0-s1', 'sprint': '1',
+        'updater_version': '8.5.0-s1.3', 'sprint': '1.3',
     }
     if overrides:
         fields.update(overrides)
@@ -119,11 +119,11 @@ class TestSnapshotCreation(unittest.TestCase):
 
     def test_updater_version_stored(self):
         s = snapshot('2024-06-01', self.db)
-        self.assertEqual(s['updater_version'], '8.5.0-s1')
+        self.assertEqual(s['updater_version'], '8.5.0-s1.3')
 
     def test_sprint_stored(self):
         s = snapshot('2024-06-01', self.db)
-        self.assertEqual(s['sprint'], '1')
+        self.assertEqual(s['sprint'], '1.3')
 
     def test_missing_date_returns_none(self):
         self.assertIsNone(snapshot('1999-01-01', self.db))
@@ -272,8 +272,8 @@ class TestBuildMetadata(unittest.TestCase):
         self.db = _tmp_db()
         conn = init_db(self.db)
         set_build_metadata(conn, {
-            'appVersion': '8.5.0-s1',
-            'sprint': '1',
+            'appVersion': '8.5.0-s1.3',
+            'sprint': '1.3',
             'gitCommit': 'abc1234',
             'buildDate': '2024-06-01T00:00:00Z',
             'databaseVersion': '2',
@@ -287,11 +287,11 @@ class TestBuildMetadata(unittest.TestCase):
 
     def test_app_version_stored(self):
         meta = get_build_metadata(self.db)
-        self.assertEqual(meta['appVersion'], '8.5.0-s1')
+        self.assertEqual(meta['appVersion'], '8.5.0-s1.3')
 
     def test_sprint_stored(self):
         meta = get_build_metadata(self.db)
-        self.assertEqual(meta['sprint'], '1')
+        self.assertEqual(meta['sprint'], '1.3')
 
     def test_git_commit_stored(self):
         meta = get_build_metadata(self.db)
