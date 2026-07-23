@@ -57,7 +57,7 @@ def main():
         ('data-view="alerts"', 'Alerts view exists'),
         ('data-view="settings"', 'Settings view exists'),
         ('data-view="about"', 'About and Glossary view exists'),
-        ('data-view="support"', 'Feedback & Support view exists'),
+        ('id="settingsSupportCard"', 'Feedback & Support widget exists in Settings'),
     ]:
         check(marker in index_text, label, failures)
 

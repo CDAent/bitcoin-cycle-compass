@@ -19,6 +19,7 @@ def test_refresh_controls_exist():
     assert 'id="sideRefresh"' in html
     assert 'id="topRefresh"' in html
     assert 'id="detailRefresh"' in html
+    assert 'id="settingsRefresh"' in html
 
 
 def test_mobile_logo_and_hamburger_exist():
@@ -26,6 +27,12 @@ def test_mobile_logo_and_hamburger_exist():
     assert 'class="mobile-header-logo"' in html
     assert 'id="mobileMenuBtn"' in html
     assert 'id="mobileDrawerClose"' in html
+
+
+def test_feedback_support_is_settings_widget_not_nav_view():
+    html = _read('index.html')
+    assert 'id="settingsSupportCard"' in html
+    assert 'data-view="support"' not in html
 
 
 def test_market_news_has_larger_widget_than_events():
