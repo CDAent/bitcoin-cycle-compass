@@ -278,8 +278,34 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
-_APP_VERSION = '8.5.0-s1'
-_SPRINT = '1'
+_APP_VERSION = '8.5.0-s1.3'
+_SPRINT = '1.3'
+
+
+def reports_payload(scores, trends, etf, macro, onchain):
+    sections = [
+        {
+            'title': 'Cycle posture',
+            'summary': (
+                f"Macro {round(float(macro.get('score', 50)))} / "
+                f"On-chain {round(float(onchain.get('score', 50)))} / "
+                f"ETF {round(float(etf.get('score', 50)))}"
+            ),
+        },
+        {
+            'title': 'Liquidity focus',
+            'summary': ', '.join(
+                f"{k}: {v}" for k, v in sorted(scores.items(), key=lambda item: item[1], reverse=True)[:3]
+            ) or 'Unavailable',
+        },
+        {
+            'title': 'Trend watch',
+            'summary': ', '.join(
+                f"{k}: {round(float(v), 2)}%" for k, v in trends.items() if k in ('Bitcoin', 'Stablecoins', 'Global equities')
+            ) or 'Unavailable',
+        },
+    ]
+    return {'status': 'available', 'sections': sections}
 
 
 def sync_manifest_versions():
@@ -650,6 +676,6 @@ def main():
         'buildDate':now_utc if _DB_AVAILABLE else datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'databaseVersion':'2','lastSuccessfulUpdate':now_utc if btc else 'partial',
     }
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'reports':reports_payload(scores,trends,etf,ma,ch),'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
