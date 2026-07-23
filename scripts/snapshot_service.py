@@ -1,5 +1,5 @@
 """
-Snapshot service for Bitcoin Cycle Compass v8.4 Sprint 2A.
+Snapshot service for Bitcoin Cycle Compass v8.5 Sprint 1.
 
 Queries the market_snapshots table and returns JSON-serialisable dicts.
 

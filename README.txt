@@ -161,3 +161,11 @@ VERSION 8.3.1 REQUESTED CHANGES
 - The daily updater refreshes the four-year rolling history on each scheduled run.
 - History uses daily resolution for 1 week, 1 month, 3 months and 6 months;
   weekly resolution remains for 1, 2 and 4 years.
+
+
+VERSION 8.5 SPRINT 1 MOBILE UX FOUNDATION
+- Upgraded mobile navigation with better horizontal scrolling, snap alignment and touch targets.
+- Added sticky mobile header/sidebar behavior for faster section switching.
+- Improved detail-panel mobile usability with a sticky header and larger close control.
+- Improved small-screen History controls with horizontal scrolling rather than compressed buttons.
+- Added touch/reduced-motion safe interaction defaults for smoother mobile behavior.

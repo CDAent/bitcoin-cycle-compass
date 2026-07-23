@@ -6,10 +6,10 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'data'/'live.json'
-UA={'User-Agent':'BitcoinCycleCompass/6.0 (+GitHub Pages)','Accept':'application/json,text/html,*/*'}
+UA={'User-Agent':'BitcoinCycleCompass/8.5 (+GitHub Pages)','Accept':'application/json,text/html,*/*'}
 
 # ---------------------------------------------------------------------------
-# v8.4 SQLite historical data layer — imported after ROOT is defined so that
+# v8.5 SQLite historical data layer — imported after ROOT is defined so that
 # relative paths in db_schema.py resolve correctly even if the script is run
 # from a different working directory.
 # ---------------------------------------------------------------------------
@@ -278,8 +278,35 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
-_APP_VERSION = '8.4.0-dev'
-_SPRINT = '2A'
+_APP_VERSION = '8.5.0-s1'
+_SPRINT = '1'
+
+
+def sync_manifest_versions():
+    major_minor = '.'.join(_APP_VERSION.split('.')[:2]) if '.' in _APP_VERSION else _APP_VERSION
+    expected_name = f'Bitcoin Cycle Compass Version {_APP_VERSION}'
+    expected_short = f'BTC Compass {major_minor}'
+    paths = [
+        ROOT / 'manifest.json',
+        ROOT.parent / 'bitcoin-cycle-compass' / 'manifest.json',
+    ]
+    for path in paths:
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding='utf-8'))
+        except Exception as exc:
+            print(f'Warning: failed to read manifest {path}: {exc}', file=sys.stderr)
+            continue
+        changed = False
+        if data.get('name') != expected_name:
+            data['name'] = expected_name
+            changed = True
+        if data.get('short_name') != expected_short:
+            data['short_name'] = expected_short
+            changed = True
+        if changed:
+            path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
 
 
 def _git_commit():
@@ -530,6 +557,7 @@ def _db_history():
 
 
 def main():
+    sync_manifest_versions()
     previous={}
     try: previous=json.loads(OUT.read_text(encoding='utf-8'))
     except: pass
@@ -587,7 +615,7 @@ def main():
     }
     live_news=safe(news,[]) or previous.get('news',[]) or []
 
-    # v8.4: persist today's data to SQLite and read history back from the DB.
+    # v8.5: persist today's data to SQLite and read history back from the DB.
     today=datetime.now(timezone.utc).strftime('%Y-%m-%d')
     now_utc=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     if _DB_AVAILABLE:

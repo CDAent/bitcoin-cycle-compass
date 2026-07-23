@@ -1,5 +1,5 @@
 """
-History service for Bitcoin Cycle Compass v8.4.
+History service for Bitcoin Cycle Compass v8.5.
 
 Queries the SQLite historical data layer and returns JSON-serialisable
 dicts for the daily / weekly range views used by the History & Trends page.

@@ -1,5 +1,5 @@
 """
-Automated tests for Bitcoin Cycle Compass v8.4 historical data layer.
+Automated tests for Bitcoin Cycle Compass v8.5 historical data layer.
 
 Covers:
   - Database creation and table structure

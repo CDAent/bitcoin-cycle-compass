@@ -1,5 +1,5 @@
 """
-SQLite schema management for Bitcoin Cycle Compass v8.4 historical data layer.
+SQLite schema management for Bitcoin Cycle Compass v8.5 historical data layer.
 
 Uses CREATE TABLE IF NOT EXISTS + schema_version table for safe migrations.
 An existing database is never destroyed -- only additive changes are applied.

@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from db_schema import DB_PATH, init_db  # noqa: E402
 
 _UA = {
-    'User-Agent': 'BitcoinCycleCompass/8.4 (+GitHub Pages)',
+    'User-Agent': 'BitcoinCycleCompass/8.5 (+GitHub Pages)',
     'Accept': 'application/json,*/*',
 }
 _VALID_PRICE_RANGE = (1_000, 2_000_000)   # USD sanity bounds
