@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-import csv, io, json, math, re, statistics, sys, urllib.parse, urllib.request, xml.etree.ElementTree as ET
+import argparse, csv, io, json, math, re, statistics, sys, urllib.parse, urllib.request, xml.etree.ElementTree as ET
 from html.parser import HTMLParser
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'data'/'live.json'
+RUNTIME_DB_PATH=ROOT/'data'/'history.db'
+MANIFEST_SYNC_PATH=ROOT/'manifest.json'
 UA={'User-Agent':'BitcoinCycleCompass/8.5 (+GitHub Pages)','Accept':'application/json,text/html,*/*'}
 
 # ---------------------------------------------------------------------------
@@ -308,31 +310,27 @@ def reports_payload(scores, trends, etf, macro, onchain):
     return {'status': 'available', 'sections': sections}
 
 
-def sync_manifest_versions():
+def sync_manifest_versions(manifest_path=None):
     major_minor = '.'.join(_APP_VERSION.split('.')[:2]) if '.' in _APP_VERSION else _APP_VERSION
     expected_name = f'Bitcoin Cycle Compass Version {_APP_VERSION}'
     expected_short = f'BTC Compass {major_minor}'
-    paths = [
-        ROOT / 'manifest.json',
-        ROOT.parent / 'bitcoin-cycle-compass' / 'manifest.json',
-    ]
-    for path in paths:
-        if not path.exists():
-            continue
-        try:
-            data = json.loads(path.read_text(encoding='utf-8'))
-        except Exception as exc:
-            print(f'Warning: failed to read manifest {path}: {exc}', file=sys.stderr)
-            continue
-        changed = False
-        if data.get('name') != expected_name:
-            data['name'] = expected_name
-            changed = True
-        if data.get('short_name') != expected_short:
-            data['short_name'] = expected_short
-            changed = True
-        if changed:
-            path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
+    path = Path(manifest_path or MANIFEST_SYNC_PATH)
+    if not path.exists():
+        return
+    try:
+        data = json.loads(path.read_text(encoding='utf-8'))
+    except Exception as exc:
+        print(f'Warning: failed to read manifest {path}: {exc}', file=sys.stderr)
+        return
+    changed = False
+    if data.get('name') != expected_name:
+        data['name'] = expected_name
+        changed = True
+    if data.get('short_name') != expected_short:
+        data['short_name'] = expected_short
+        changed = True
+    if changed:
+        path.write_text(json.dumps(data, indent=2) + '\n', encoding='utf-8')
 
 
 def _git_commit():
@@ -559,7 +557,7 @@ def write_full_snapshot(conn, today, now_utc, btc, aud, fg, st, etf, ma, ch,
         print(f'Warning: write_full_snapshot failed: {e}', file=sys.stderr)
 
 
-def _db_history():
+def _db_history(db_path=None):
     """
     Return (daily_list, weekly_list) from SQLite.
 
@@ -570,20 +568,33 @@ def _db_history():
     if not _DB_AVAILABLE:
         return [], []
     try:
-        daily = get_daily_history()
+        daily = get_daily_history(db_path=db_path)
         if not daily:
             print('DB empty -- importing four-year BTC history...', file=sys.stderr)
-            _import_history_mod.import_history(verbose=True)
-            daily = get_daily_history()
-        weekly = get_weekly_history()
+            _import_history_mod.import_history(db_path=db_path, verbose=True)
+            daily = get_daily_history(db_path=db_path)
+        weekly = get_weekly_history(db_path=db_path)
         return daily, weekly
     except Exception as e:
         print(f'Warning: DB history read failed: {e}', file=sys.stderr)
         return [], []
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Generate live snapshot JSON for Bitcoin Cycle Compass.')
+    parser.add_argument('--output', default=str(OUT), help='Path to write live.json output')
+    parser.add_argument('--db-path', default=str(RUNTIME_DB_PATH), help='SQLite runtime DB path')
+    parser.add_argument('--manifest-path', default=str(MANIFEST_SYNC_PATH), help='Manifest path to sync version metadata')
+    return parser.parse_args()
+
+
 def main():
-    sync_manifest_versions()
+    global OUT, RUNTIME_DB_PATH, MANIFEST_SYNC_PATH
+    args = parse_args()
+    OUT = Path(args.output)
+    RUNTIME_DB_PATH = Path(args.db_path)
+    MANIFEST_SYNC_PATH = Path(args.manifest_path)
+    sync_manifest_versions(MANIFEST_SYNC_PATH)
     previous={}
     try: previous=json.loads(OUT.read_text(encoding='utf-8'))
     except: pass
@@ -646,7 +657,7 @@ def main():
     now_utc=datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
     if _DB_AVAILABLE:
         try:
-            _db_conn=init_db()
+            _db_conn=init_db(RUNTIME_DB_PATH)
             save_daily_to_db(_db_conn, today, btc, aud, fg, st, etf, ma, ch, scores, btc_score, proxies)
             write_full_snapshot(_db_conn, today, now_utc, btc, aud, fg, st, etf, ma, ch, scores, btc_score, proxies)
             _build_meta={
@@ -664,7 +675,7 @@ def main():
             print(f'Warning: DB daily save failed: {_db_err}', file=sys.stderr)
 
     # Retrieve history from SQLite; fall back to Yahoo Finance fetch if DB is empty.
-    daily_hist, weekly_hist = _db_history()
+    daily_hist, weekly_hist = _db_history(db_path=RUNTIME_DB_PATH)
     if not daily_hist:
         daily_hist=safe(daily_btc_history,[]) or []
     if not weekly_hist:

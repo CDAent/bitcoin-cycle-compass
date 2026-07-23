@@ -3,3 +3,8 @@ __pycache__/
 *.pyo
 *.pyd
 .DS_Store
+dist/
+data/history.db
+data/history.db-wal
+data/history.db-shm
+data/history.db-journal

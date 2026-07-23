@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
+import argparse
 import json
 import re
-import sys
+import sqlite3
+import tempfile
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_VERSION = '8.5.2'
+DEFAULT_RELEASE_DIR = ROOT / 'dist' / 'release'
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Verify staged release output.')
+    parser.add_argument('--release-dir', default=str(DEFAULT_RELEASE_DIR), help='Staged release directory')
+    return parser.parse_args()
 
 
 def read_text(path):
@@ -25,23 +34,65 @@ def check(condition, label, failures):
         failures.append(label)
 
 
+def verify_db_bootstrap(failures):
+    scripts_dir = ROOT / 'scripts'
+    import sys
+
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+
+    from db_schema import init_db  # noqa: E402
+    from snapshot_service import snapshot, upsert_snapshot  # noqa: E402
+
+    with tempfile.TemporaryDirectory(prefix='bcc-db-bootstrap-') as tmp:
+        db_path = Path(tmp) / 'data' / 'history.db'
+        conn = init_db(db_path)
+        conn.close()
+        check(db_path.exists(), 'runtime history database is auto-created from scratch', failures)
+        conn = sqlite3.connect(db_path)
+        tables = {
+            row[0]
+            for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        }
+        required = {'schema_version', 'btc_daily', 'market_snapshots', 'build_metadata'}
+        check(required.issubset(tables), 'required schema tables are created', failures)
+        conn.close()
+
+        conn = init_db(db_path)
+        upsert_snapshot(conn, '2026-01-01', {'btc_usd': 100000.0, 'btc_quality_status': 'live'})
+        conn.commit()
+        conn.close()
+        round_trip = snapshot('2026-01-01', db_path)
+        check(round_trip is not None and round_trip.get('btc_usd') == 100000.0, 'snapshot write/read succeeds on auto-created DB', failures)
+
+
 def main():
+    args = parse_args()
+    release_dir = Path(args.release_dir).resolve()
     failures = []
-    index_text = read_text(ROOT / 'index.html')
-    sw_text = read_text(ROOT / 'service-worker.js')
-    manifest = read_json(ROOT / 'manifest.json')
-    live = read_json(ROOT / 'data' / 'live.json')
 
-    check(f'v{RELEASE_VERSION}' in index_text, 'index.html visible version matches release', failures)
-    check(manifest.get('name', '').endswith(RELEASE_VERSION), 'manifest version matches release', failures)
-    check(live.get('appVersion') == RELEASE_VERSION, 'live.json appVersion matches release', failures)
-    check(live.get('buildMeta', {}).get('appVersion') == RELEASE_VERSION, 'build metadata version matches release', failures)
-    check(f"CACHE_VERSION = '{RELEASE_VERSION}'" in sw_text, 'service-worker cache version matches release', failures)
+    check(release_dir.exists(), f'release directory exists ({release_dir})', failures)
+    if failures:
+        print('\nSUMMARY:')
+        print(f'FAIL ({len(failures)} checks failed)')
+        return 1
 
-    check(isinstance(live, dict), 'live.json exists and parses', failures)
-    check(bool(live.get('historyDaily')), 'historyDaily is populated', failures)
-    check(bool(live.get('historyWeekly')), 'historyWeekly is populated', failures)
-    check(bool(live.get('reports')) and bool(live.get('reports', {}).get('sections')), 'reports payload exists', failures)
+    index_text = read_text(release_dir / 'index.html')
+    sw_text = read_text(release_dir / 'service-worker.js')
+    manifest = read_json(release_dir / 'manifest.json')
+    live = read_json(release_dir / 'data' / 'live.json')
+
+    check(f'v{RELEASE_VERSION}' in index_text, 'staged index.html visible version matches release', failures)
+    check(manifest.get('name', '').endswith(RELEASE_VERSION), 'staged manifest version matches release', failures)
+    check(live.get('appVersion') == RELEASE_VERSION, 'staged live.json appVersion matches release', failures)
+    check(live.get('buildMeta', {}).get('appVersion') == RELEASE_VERSION, 'staged build metadata version matches release', failures)
+    check(f"CACHE_VERSION = '{RELEASE_VERSION}'" in sw_text, 'staged service-worker cache version matches release', failures)
+
+    check(isinstance(live, dict), 'staged live.json exists and parses', failures)
+    check(bool(live.get('historyDaily')), 'staged historyDaily is populated', failures)
+    check(bool(live.get('historyWeekly')), 'staged historyWeekly is populated', failures)
+    check(bool(live.get('reports')) and bool(live.get('reports', {}).get('sections')), 'staged reports payload exists', failures)
+    check((release_dir / 'data' / 'history.db').exists(), 'staged runtime history database exists', failures)
 
     for marker, label in [
         ('id="sideRefresh"', 'refresh buttons exist (sidebar)'),
@@ -70,11 +121,11 @@ def main():
 
     obsolete_hits = []
     obsolete_pattern = re.compile(r'8\.5\.(?:0(?:-s1(?:\.3)?)?|1)')
-    for path in [ROOT / 'index.html', ROOT / 'manifest.json', ROOT / 'service-worker.js', ROOT / 'data' / 'live.json']:
+    for path in [release_dir / 'index.html', release_dir / 'manifest.json', release_dir / 'service-worker.js', release_dir / 'data' / 'live.json']:
         text = read_text(path)
         if obsolete_pattern.search(text):
             obsolete_hits.append(str(path))
-    check(not obsolete_hits, 'no obsolete hardcoded version remains', failures)
+    check(not obsolete_hits, 'no obsolete hardcoded version remains in staged files', failures)
 
     lower_index = index_text.lower()
     full_page_placeholder = (
@@ -82,6 +133,8 @@ def main():
         ('<h1>coming soon' in lower_index or '<title>coming soon' in lower_index)
     )
     check(not full_page_placeholder, 'no forbidden Coming Soon full-page placeholder remains', failures)
+
+    verify_db_bootstrap(failures)
 
     print('\nSUMMARY:')
     if failures:

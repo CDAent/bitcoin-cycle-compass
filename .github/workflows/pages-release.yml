@@ -31,9 +31,15 @@ jobs:
         run: |
           find . -type d -name "__pycache__" -prune -exec rm -rf {} +
           find . -type f \( -name "*.pyc" -o -name "*.pyo" \) -delete
+          rm -rf dist
 
-      - name: Build release snapshot
-        run: python3 scripts/build_release.py
+      - name: Confirm clean tracked source tree before checks
+        run: |
+          if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+            echo "Tracked source tree is dirty before build."
+            git status --porcelain --untracked-files=no
+            exit 1
+          fi
 
       - name: Run tests
         run: python3 -m pytest tests/ -q
@@ -41,14 +47,25 @@ jobs:
       - name: Compile scripts
         run: python3 -m py_compile scripts/*.py
 
-      - name: Verify release
-        run: python3 scripts/verify_release.py
+      - name: Build staged release
+        run: python3 scripts/build_release.py --stage-dir dist/release
+
+      - name: Verify staged release
+        run: python3 scripts/verify_release.py --release-dir dist/release
+
+      - name: Confirm clean tracked source tree after build
+        run: |
+          if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+            echo "Tracked source tree became dirty after build/verify."
+            git status --porcelain --untracked-files=no
+            exit 1
+          fi
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist/release
 
   deploy:
     if: github.ref == 'refs/heads/main'
