@@ -1,28 +1,28 @@
 {
-  "generatedAt": "2026-07-23T06:09:08.141987+00:00",
+  "generatedAt": "2026-07-23T06:31:45.838159+00:00",
   "status": "Live scheduled research snapshot",
-  "appVersion": "8.5.0-s1.1",
+  "appVersion": "8.5.0-s1.2",
   "btc": {
-    "usd": 65656.29,
-    "aud": 93881.92907099999,
-    "change24h": -0.3496533655454611,
+    "usd": 65703.2125,
+    "aud": 93949.02355374998,
+    "change24h": -0.15947201294589,
     "method": "trimmed average / median check",
     "sources": [
       {
         "name": "Coinbase",
-        "usd": 65650.0
+        "usd": 65709.15
       },
       {
         "name": "Kraken",
-        "usd": 65649.9
+        "usd": 65694.7
       },
       {
         "name": "Bitstamp",
-        "usd": 65649.26
+        "usd": 65706.0
       },
       {
         "name": "CoinGecko index",
-        "usd": 65676.0
+        "usd": 65703.0
       }
     ]
   },
@@ -36,10 +36,10 @@
     "change24h": -2.0
   },
   "stablecoins": {
-    "marketCapUsd": 307382284524.91,
-    "change1d": 0.3276386415256738,
-    "change7d": 0.4369667801859656,
-    "change30d": -1.751385059579491
+    "marketCapUsd": 307365264205.59,
+    "change1d": 0.3220833166671433,
+    "change7d": 0.43140540162842633,
+    "change30d": -1.7568252650930094
   },
   "etf": {
     "status": "live",
@@ -151,8 +151,8 @@
         "change30d": -41.40425201540246
       },
       "mempool-size": {
-        "latest": 34304672.0,
-        "change30d": 13176.829475965633
+        "latest": 33526573.5,
+        "change30d": 10804.635187549296
       }
     }
   },
@@ -173,8 +173,8 @@
     "Global equities": 0.0,
     "AI technology": 0.0,
     "Emerging markets": 0.0,
-    "Bitcoin": -0.3496533655454611,
-    "Stablecoins": 0.4369667801859656,
+    "Bitcoin": -0.15947201294589,
+    "Stablecoins": 0.43140540162842633,
     "Gold": 0.0,
     "Silver": 0.0,
     "Other": 0
@@ -1217,8 +1217,8 @@
     },
     {
       "week": "2026-07-20",
-      "usd": 65656.29,
-      "aud": 93881.93
+      "usd": 65703.21,
+      "aud": 93949.02
     }
   ],
   "historyDaily": [
@@ -8534,8 +8534,8 @@
     },
     {
       "day": "2026-07-23",
-      "usd": 65656.29,
-      "aud": 93881.93
+      "usd": 65703.21,
+      "aud": 93949.02
     }
   ],
   "proxies": {
@@ -8803,10 +8803,10 @@
       "why": "This story may affect market expectations, but its broader financial impact has not yet been confirmed."
     },
     {
-      "title": "Hyperliquid, Robinhood could lead crypto\u2019s next bull market as DeFi and TradFi converge - FXStreet",
-      "url": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxOelFIc1ZvY0h4WXJVYkJoUmlIUzUxamh1dk5aVmtWYnlLOXpyd1YwZGNILVZSOFBfRC1rRUlTZmNQNXRvZ29vX0t5Q3VsZlJ3MkRDV1FwMVNyY2ZMNW9Uc2NER0llc3pzUmdldUtqQ1F5VTFEbWlxam8zYUNCeWhfRVB6MUhJaHpNN1lyanhFaXNXOVkwdmhpS0xBdTBMVnlBUWJJTW0yX1otNHplVnZXUFhYcWF0cXlKMThoQWxNckVuNng0TllkWnFrYVRqaU1pSzFGNGtJZW52UERhdUE?oc=5",
-      "source": "FXStreet",
-      "date": "Wed, 22 Jul 2026 21:40:34 GMT",
+      "title": "Tesla holds bitcoin treasury steady, reports $112M impairment loss - CoinDesk",
+      "url": "https://news.google.com/rss/articles/CBMipAFBVV95cUxNTC1jQWF6dFNlaUhsQ3BmcVZ2ZEhYQnNJWUw2TWgzSGVZa0dCSGxRYnVzRFdSWmFLQUFlcklCczc3MjVKdElEUkZxLVRPa2FUb3pGVFZJRUJycGxkQTc5VzctMGFWdm93clpZX014M1FDNmIwZGx1aWEwMXZrQkg2enhEbEJQOE1XZHE3ejJHSkxYbDZVWC1nXzVxTENsU1RUSGdwVQ?oc=5",
+      "source": "CoinDesk",
+      "date": "Wed, 22 Jul 2026 20:43:46 GMT",
       "impactScore": 30,
       "stars": 2,
       "impact": "Neutral",
@@ -8816,10 +8816,10 @@
       "why": "Crypto-specific developments can affect digital-asset liquidity and sentiment."
     },
     {
-      "title": "USD/JPY, Gold and Bitcoin Forecasts \u2013 Rising Yields Drive Market Inflections - FXEmpire",
-      "url": "https://news.google.com/rss/articles/CBMizAFBVV95cUxNZWVZdU9yZzFCT2tmZzBRMTBuMU9OQnJJMHgwWE9POTZQZldwS25ORjVvSHFvQlVQMEtFQWx3MV8tYjV5QVV1WlRsSEI0Rm5TalFWYzZTTHR0UGZid05yRURmX1p3X3lHUVNIYm80aWdqelFISUJRN05Yc051SEIyS3pFQmJSRXpIV1ZyS2pFVlh3UFVJaExpajBsVE9pcFRTbGtXYU0tcENCZkhpakVDR1I3Nlg0TFZUZnBLZFFlcnVHTUZ0eHRMWnFuLVg?oc=5",
-      "source": "FXEmpire",
-      "date": "Wed, 22 Jul 2026 13:02:00 GMT",
+      "title": "Peter Brandt Predicts Bitcoin Bear Market Bottom Still Lies Ahead - Crypto News Australia",
+      "url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxOeURFR0tkVV9GUHFOdDYtZU9tWEs1VjczZUlBQjI3TV95bGpxcWZaQVZTMzk0Ql94QWVBVDBCV3JmLU52MkFlWjFidUEwbTFCSkl2M20tcVRTQS1QVzJucXkzRzVKVjktNW00dm1PSUhFQ0V6cjZjSk92R051SXhOZU00UE42NlJpTHdrOHdGZGl2V0pwSlFIYVc1OUV0QUxMOXZlU19CSQ?oc=5",
+      "source": "Crypto News Australia",
+      "date": "Tue, 21 Jul 2026 08:38:04 GMT",
       "impactScore": 30,
       "stars": 2,
       "impact": "Neutral",
@@ -8856,19 +8856,19 @@
     }
   ],
   "buildMeta": {
-    "appVersion": "8.5.0-s1.1",
+    "appVersion": "8.5.0-s1.2",
     "sprint": "1",
-    "gitCommit": "41be8d0",
-    "buildDate": "2026-07-23T06:09:08Z",
+    "gitCommit": "d3ae768",
+    "buildDate": "2026-07-23T06:31:45Z",
     "databaseVersion": "2",
-    "lastSuccessfulUpdate": "2026-07-23T06:09:08Z"
+    "lastSuccessfulUpdate": "2026-07-23T06:31:45Z"
   },
   "reports": {
-    "currentBtcUsd": 65656.29,
-    "currentBtcAud": 93881.92907099999,
-    "change24h": -0.3496533655454611,
+    "currentBtcUsd": 65703.2125,
+    "currentBtcAud": 93949.02355374998,
+    "change24h": -0.15947201294589,
     "fearGreed": 31.0,
-    "stablecoin7d": 0.4369667801859656,
+    "stablecoin7d": 0.43140540162842633,
     "etfDailyUsdMillions": 69.1,
     "macroScore": 61.0,
     "onchainScore": 20.0

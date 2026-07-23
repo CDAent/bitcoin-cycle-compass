@@ -54,7 +54,7 @@ def _seed_snapshot(db_path, d, overrides=None):
         'aud_usd': 0.65, 'aud_usd_quality': 'live',
         'macro_score': 55, 'onchain_score': 60, 'btc_score': 58,
         'scores_quality': 'live',
-        'updater_version': '8.5.0-s1.1', 'sprint': '1',
+        'updater_version': '8.5.0-s1.2', 'sprint': '1',
     }
     if overrides:
         fields.update(overrides)
@@ -119,7 +119,7 @@ class TestSnapshotCreation(unittest.TestCase):
 
     def test_updater_version_stored(self):
         s = snapshot('2024-06-01', self.db)
-        self.assertEqual(s['updater_version'], '8.5.0-s1.1')
+        self.assertEqual(s['updater_version'], '8.5.0-s1.2')
 
     def test_sprint_stored(self):
         s = snapshot('2024-06-01', self.db)
@@ -272,7 +272,7 @@ class TestBuildMetadata(unittest.TestCase):
         self.db = _tmp_db()
         conn = init_db(self.db)
         set_build_metadata(conn, {
-            'appVersion': '8.5.0-s1.1',
+            'appVersion': '8.5.0-s1.2',
             'sprint': '1',
             'gitCommit': 'abc1234',
             'buildDate': '2024-06-01T00:00:00Z',
@@ -287,7 +287,7 @@ class TestBuildMetadata(unittest.TestCase):
 
     def test_app_version_stored(self):
         meta = get_build_metadata(self.db)
-        self.assertEqual(meta['appVersion'], '8.5.0-s1.1')
+        self.assertEqual(meta['appVersion'], '8.5.0-s1.2')
 
     def test_sprint_stored(self):
         meta = get_build_metadata(self.db)
