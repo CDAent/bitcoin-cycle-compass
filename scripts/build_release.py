@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = '8.5.0-s1.3'
+RELEASE_VERSION = '8.5.2'
 
 
 def fail(message):
@@ -71,7 +71,14 @@ def validate_release_files():
         else:
             ok = fail(f'Missing required asset: {asset}') and ok
 
-    required_controls = ['id="sideRefresh"', 'id="topRefresh"', 'id="settingsRefresh"', 'id="mobileMenuBtn"', 'id="detailMenuBtn"']
+    required_controls = [
+        'id="sideRefresh"',
+        'id="topRefresh"',
+        'id="settingsRefresh"',
+        'id="mobileHeaderRefresh"',
+        'id="mobileMenuBtn"',
+        'id="mobileSharedHeader"',
+    ]
     for marker in required_controls:
         if marker in index_text:
             pass_msg(f'UI control exists: {marker}')

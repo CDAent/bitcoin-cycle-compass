@@ -6,8 +6,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = '8.5.0-s1.3'
-OBSOLETE_VERSION = '8.5.0-s1'
+RELEASE_VERSION = '8.5.2'
 
 
 def read_text(path):
@@ -46,14 +45,15 @@ def main():
 
     for marker, label in [
         ('id="sideRefresh"', 'refresh buttons exist (sidebar)'),
-        ('id="topRefresh"', 'refresh buttons exist (dashboard header)'),
+        ('id="topRefresh"', 'refresh buttons exist (desktop header)'),
         ('id="settingsRefresh"', 'refresh button exists in Settings'),
-        ('class="mobile-header-logo"', 'mobile logo exists'),
+        ('id="mobileHeaderRefresh"', 'refresh button exists in mobile header'),
+        ('id="mobileHeaderLogo"', 'mobile logo exists'),
+        ('id="mobileSharedHeader"', 'shared mobile header exists'),
         ('id="mobileMenuBtn"', 'hamburger open button exists'),
         ('id="mobileDrawerClose"', 'hamburger close button exists'),
-        ('id="detailMenuBtn"', 'index selector exists in page header'),
         ('data-view="history"', 'History view exists'),
-        ('data-view="reports"', 'Reports view exists'),
+        ('reports:()=>', 'Reports view route exists'),
         ('data-view="news"', 'Market News view exists'),
         ('data-view="alerts"', 'Alerts view exists'),
         ('data-view="settings"', 'Settings view exists'),
@@ -61,6 +61,7 @@ def main():
         ('id="settingsSupportCard"', 'Feedback & Support widget exists in Settings'),
     ]:
         check(marker in index_text, label, failures)
+    check('data-view="reports"' not in index_text, 'Reports is hidden from visible navigation', failures)
 
     ids = re.findall(r'id="([^"]+)"', index_text)
     duplicate_ids = [item for item, count in Counter(ids).items() if count > 1]
@@ -68,7 +69,7 @@ def main():
     check('id="detailClose"' not in index_text, 'no per-page close X button remains', failures)
 
     obsolete_hits = []
-    obsolete_pattern = re.compile(r'8\.5\.0-s1(?!\.3)')
+    obsolete_pattern = re.compile(r'8\.5\.(?:0(?:-s1(?:\.3)?)?|1)')
     for path in [ROOT / 'index.html', ROOT / 'manifest.json', ROOT / 'service-worker.js', ROOT / 'data' / 'live.json']:
         text = read_text(path)
         if obsolete_pattern.search(text):

@@ -1,4 +1,4 @@
-const CACHE_VERSION = '8.5.0-s1.3';
+const CACHE_VERSION = '8.5.2';
 const CACHE_NAME = `btc-cycle-compass-${CACHE_VERSION}`;
 const STABLE_ASSETS = [
   './bitcoin-compass-base.png',
