@@ -181,3 +181,45 @@ def get_build_metadata(db_path=None):
         return {r['key']: r['value'] for r in rows}
     finally:
         conn.close()
+
+
+def _safe_float(value):
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return None
+    return out
+
+
+def build_reports_payload(snapshot):
+    """
+    Build a compact reports payload from live snapshot data.
+
+    Missing/unavailable values are represented as None so the UI can render
+    "Data unavailable" explicitly.
+    """
+    snapshot = snapshot or {}
+    btc = snapshot.get('btc') or {}
+    fx = snapshot.get('fx') or {}
+    fear_greed = snapshot.get('fearGreed') or {}
+    stable = snapshot.get('stablecoins') or {}
+    etf = snapshot.get('etf') or {}
+    macro = snapshot.get('macro') or {}
+    onchain = snapshot.get('onchain') or {}
+
+    btc_usd = _safe_float(btc.get('usd'))
+    usd_aud = _safe_float(fx.get('usdAud'))
+    current_btc_aud = btc_usd * usd_aud if (
+        btc_usd is not None and usd_aud is not None
+    ) else None
+
+    return {
+        'currentBtcUsd': btc_usd,
+        'currentBtcAud': current_btc_aud,
+        'change24h': _safe_float(btc.get('change24h')),
+        'fearGreed': _safe_float(fear_greed.get('value')),
+        'stablecoin7d': _safe_float(stable.get('change7d')),
+        'etfDailyUsdMillions': _safe_float(etf.get('dailyUsdMillions')),
+        'macroScore': _safe_float(macro.get('score')),
+        'onchainScore': _safe_float(onchain.get('score')),
+    }

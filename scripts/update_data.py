@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 try:
     from db_schema import init_db
     from history_service import get_daily_history, get_weekly_history
-    from snapshot_service import upsert_snapshot, set_build_metadata
+    from snapshot_service import upsert_snapshot, set_build_metadata, build_reports_payload
     import import_history as _import_history_mod
     _DB_AVAILABLE = True
 except ImportError as _db_import_err:
@@ -278,7 +278,7 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
-_APP_VERSION = '8.5.0-s1'
+_APP_VERSION = '8.5.0-s1.1'
 _SPRINT = '1'
 
 
@@ -651,5 +651,6 @@ def main():
         'databaseVersion':'2','lastSuccessfulUpdate':now_utc if btc else 'partial',
     }
     out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
+    out['reports'] = build_reports_payload(out) if _DB_AVAILABLE else {}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()

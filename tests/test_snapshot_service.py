@@ -27,7 +27,7 @@ from db_schema import init_db, get_schema_version, _SCHEMA_V1, get_connection  #
 from snapshot_service import (  # noqa
     latest_snapshot, snapshot, nearest_snapshot,
     range_query, compare_snapshots,
-    upsert_snapshot, set_build_metadata, get_build_metadata,
+    upsert_snapshot, set_build_metadata, get_build_metadata, build_reports_payload,
 )
 
 
@@ -54,7 +54,7 @@ def _seed_snapshot(db_path, d, overrides=None):
         'aud_usd': 0.65, 'aud_usd_quality': 'live',
         'macro_score': 55, 'onchain_score': 60, 'btc_score': 58,
         'scores_quality': 'live',
-        'updater_version': '8.5.0-s1', 'sprint': '1',
+        'updater_version': '8.5.0-s1.1', 'sprint': '1',
     }
     if overrides:
         fields.update(overrides)
@@ -119,7 +119,7 @@ class TestSnapshotCreation(unittest.TestCase):
 
     def test_updater_version_stored(self):
         s = snapshot('2024-06-01', self.db)
-        self.assertEqual(s['updater_version'], '8.5.0-s1')
+        self.assertEqual(s['updater_version'], '8.5.0-s1.1')
 
     def test_sprint_stored(self):
         s = snapshot('2024-06-01', self.db)
@@ -272,7 +272,7 @@ class TestBuildMetadata(unittest.TestCase):
         self.db = _tmp_db()
         conn = init_db(self.db)
         set_build_metadata(conn, {
-            'appVersion': '8.5.0-s1',
+            'appVersion': '8.5.0-s1.1',
             'sprint': '1',
             'gitCommit': 'abc1234',
             'buildDate': '2024-06-01T00:00:00Z',
@@ -287,7 +287,7 @@ class TestBuildMetadata(unittest.TestCase):
 
     def test_app_version_stored(self):
         meta = get_build_metadata(self.db)
-        self.assertEqual(meta['appVersion'], '8.5.0-s1')
+        self.assertEqual(meta['appVersion'], '8.5.0-s1.1')
 
     def test_sprint_stored(self):
         meta = get_build_metadata(self.db)
@@ -535,7 +535,51 @@ class TestRangeQuery(unittest.TestCase):
 
 
 # ===========================================================================
-# 9. V1 -> V2 migration
+# 9. Reports payload mapping
+# ===========================================================================
+class TestReportsPayload(unittest.TestCase):
+
+    def test_reports_payload_maps_available_values(self):
+        payload = build_reports_payload({
+            'btc': {'usd': 100000.0, 'change24h': 1.25},
+            'fx': {'usdAud': 1.5},
+            'fearGreed': {'value': 61},
+            'stablecoins': {'change7d': 2.75},
+            'etf': {'dailyUsdMillions': 350.0},
+            'macro': {'score': 58},
+            'onchain': {'score': 63},
+        })
+        self.assertEqual(payload['currentBtcUsd'], 100000.0)
+        self.assertEqual(payload['currentBtcAud'], 150000.0)
+        self.assertEqual(payload['change24h'], 1.25)
+        self.assertEqual(payload['fearGreed'], 61.0)
+        self.assertEqual(payload['stablecoin7d'], 2.75)
+        self.assertEqual(payload['etfDailyUsdMillions'], 350.0)
+        self.assertEqual(payload['macroScore'], 58.0)
+        self.assertEqual(payload['onchainScore'], 63.0)
+
+    def test_reports_payload_uses_none_for_missing_values(self):
+        payload = build_reports_payload({
+            'btc': {'usd': None, 'change24h': None},
+            'fx': {'usdAud': None},
+            'fearGreed': {'value': None},
+            'stablecoins': {'change7d': None},
+            'etf': {'dailyUsdMillions': None},
+            'macro': {'score': None},
+            'onchain': {'score': None},
+        })
+        self.assertIsNone(payload['currentBtcUsd'])
+        self.assertIsNone(payload['currentBtcAud'])
+        self.assertIsNone(payload['change24h'])
+        self.assertIsNone(payload['fearGreed'])
+        self.assertIsNone(payload['stablecoin7d'])
+        self.assertIsNone(payload['etfDailyUsdMillions'])
+        self.assertIsNone(payload['macroScore'])
+        self.assertIsNone(payload['onchainScore'])
+
+
+# ===========================================================================
+# 10. V1 -> V2 migration
 # ===========================================================================
 class TestV1ToV2Migration(unittest.TestCase):
 

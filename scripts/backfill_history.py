@@ -32,7 +32,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from db_schema import DB_PATH, init_db          # noqa: E402
 from snapshot_service import upsert_snapshot    # noqa: E402
 
-APP_VERSION = '8.5.0-s1'
+APP_VERSION = '8.5.0-s1.1'
 SPRINT = '1'
 UA = {'User-Agent': 'BitcoinCycleCompass/8.5 (+GitHub Pages)', 'Accept': '*/*'}
 
