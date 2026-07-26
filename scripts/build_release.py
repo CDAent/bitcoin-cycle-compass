@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = '8.5.2'
+RELEASE_VERSION = '8.6.0'
 DEFAULT_STAGE_DIR = ROOT / 'dist' / 'release'
 STATIC_FILES = [
     'index.html',

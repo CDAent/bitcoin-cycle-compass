@@ -8,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = '8.5.2'
+RELEASE_VERSION = '8.6.0'
 DEFAULT_RELEASE_DIR = ROOT / 'dist' / 'release'
 
 

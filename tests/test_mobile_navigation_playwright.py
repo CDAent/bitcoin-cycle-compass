@@ -102,8 +102,8 @@ def test_mobile_header_navigation_and_layout(app_url):
 
             page.goto(app_url, wait_until="networkidle")
             page.evaluate("openDetail('alerts')")
-            page.wait_for_selector(".alert-threshold-row")
-            assert page.locator(".alert-threshold-row").count() >= 9
+            page.wait_for_selector(".alert-card")
+            assert page.locator(".alert-card").count() >= 9
 
             page.goto(app_url, wait_until="networkidle")
             event_columns = page.evaluate("() => getComputedStyle(document.getElementById('eventsList')).gridTemplateColumns")

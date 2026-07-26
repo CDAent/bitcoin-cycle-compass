@@ -280,7 +280,7 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
-_APP_VERSION = '8.5.2'
+_APP_VERSION = '8.6.0'
 _SPRINT = '2'
 
 
