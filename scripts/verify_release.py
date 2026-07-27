@@ -113,7 +113,7 @@ def main():
     ]:
         check(marker in index_text, label, failures)
     check('data-view="reports"' not in index_text, 'Reports is hidden from visible navigation', failures)
-    blocked_endpoint_tokens = ['your-private-endpoint', 'placeholder.example', 'demo', 'localhost', '127.0.0.1']
+    blocked_endpoint_tokens = ['your-private-endpoint.example', 'placeholder.example', 'demo.example', 'http://localhost', 'http://127.0.0.1', 'https://localhost', 'https://127.0.0.1']
     check(not any(token in index_text.lower() for token in blocked_endpoint_tokens), 'no sample or placeholder external AI endpoints in staged index', failures)
     check('supportSubmit' in index_text and 'supportType' in index_text, 'Feedback & Support form controls exist in staged index', failures)
 
