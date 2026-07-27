@@ -184,20 +184,70 @@ def etf_demand_proxy():
     label='Strong demand' if score>=65 else 'Positive demand' if score>=55 else 'Balanced' if score>=45 else 'Weak demand' if score>=35 else 'Strong selling pressure'
     return {'status':'live proxy','score':score,'label':label,'return1d':ret,'volumeVs20d':vr,'aggregateDollarVolumeUsd':total,'funds':funds}
 
-def etf_flow():
+
+def etf_flow(previous=None):
     rows=[]; source=None
+    errors=[]
     for url in ['https://farside.co.uk/bitcoin-etf-flow-all-data/','https://farside.co.uk/btc/']:
         try:
             rows=_parse_farside(url)
-            if rows: source=url; break
-        except: pass
+            if rows:
+                source=url
+                break
+        except Exception as exc:
+            errors.append(f'{url}: {exc}')
     proxy=etf_demand_proxy()
+
+    prev=previous if isinstance(previous,dict) else {}
+    prev_daily=prev.get('dailyUsdMillions')
+    prev_date=prev.get('date')
+
     if rows:
-        latest=rows[-1]; last5=sum(x['usdMillions'] for x in rows[-5:]); last20=sum(x['usdMillions'] for x in rows[-20:])
+        latest=rows[-1]
+        last5=sum(x['usdMillions'] for x in rows[-5:])
+        last20=sum(x['usdMillions'] for x in rows[-20:])
         flow_score=round(clamp(50+latest['usdMillions']/15))
         combined=round(clamp(flow_score*0.72+proxy.get('score',50)*0.28))
-        return {'status':'live','source':'Farside','sourceUrl':source,'dailyUsdMillions':latest['usdMillions'],'date':latest['date'],'fiveDayUsdMillions':last5,'twentyDayUsdMillions':last20,'flowScore':flow_score,'proxy':proxy,'score':combined,'scoreSource':'confirmed flow + ETF demand proxy'}
-    return {'status':'proxy only','dailyUsdMillions':None,'fiveDayUsdMillions':None,'twentyDayUsdMillions':None,'proxy':proxy,'score':proxy.get('score',50),'scoreSource':'ETF demand proxy only'}
+        stale=False
+        try:
+            age=(datetime.now(timezone.utc).date()-datetime.strptime(latest['date'],'%Y-%m-%d').date()).days
+            stale=age>4
+        except Exception:
+            stale=False
+        return {
+            'status':'stale' if stale else 'live',
+            'source':'Farside',
+            'sourceUrl':source,
+            'dailyUsdMillions':None if stale else latest['usdMillions'],
+            'date':latest['date'],
+            'fiveDayUsdMillions':last5,
+            'twentyDayUsdMillions':last20,
+            'flowScore':flow_score,
+            'proxy':proxy,
+            'score':combined,
+            'scoreSource':'confirmed flow + ETF demand proxy' if not stale else 'stale flow data + ETF demand proxy',
+            'dailyAvailable':not stale,
+            'lastValidDailyUsdMillions':latest['usdMillions'] if not stale else prev_daily,
+            'lastValidDate':latest['date'] if not stale else prev_date,
+            'errors':errors,
+        }
+
+    return {
+        'status':'unavailable',
+        'source':'Farside',
+        'sourceUrl':source,
+        'dailyUsdMillions':None,
+        'date':None,
+        'fiveDayUsdMillions':None,
+        'twentyDayUsdMillions':None,
+        'proxy':proxy,
+        'score':proxy.get('score',50),
+        'scoreSource':'ETF demand proxy only',
+        'dailyAvailable':False,
+        'lastValidDailyUsdMillions':prev_daily,
+        'lastValidDate':prev_date,
+        'errors':errors,
+    }
 
 
 
@@ -280,7 +330,7 @@ def events():
       {'tag':'LIVE','title':'Market-implied Federal Reserve rate probabilities','source':'CME FedWatch','url':'https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html'}
     ]
 
-_APP_VERSION = '8.6.0'
+_APP_VERSION = '8.6.1'
 _SPRINT = '2'
 
 
@@ -610,7 +660,8 @@ def main():
     st=safe(stablecoins, previous.get('stablecoins',{'marketCapUsd':None,'change1d':0,'change7d':0,'change30d':0}))
     ma=safe(macro, previous.get('macro',{'score':50}))
     ch=safe(chain, previous.get('onchain',{'score':50}))
-    etf=safe(etf_flow, previous.get('etf',{'status':'unavailable','dailyUsdMillions':None,'score':50}))
+    prev_etf=previous.get('etf',{'status':'unavailable','dailyUsdMillions':None,'score':50})
+    etf=safe(lambda:etf_flow(prev_etf), prev_etf)
 
     # Guaranteed market-based indication when confirmed flow and ETF trading proxy fail.
     proxy=etf.get('proxy') or {}

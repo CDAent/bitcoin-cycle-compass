@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-07-23T14:21:59.384804+00:00",
   "status": "Live scheduled research snapshot",
-  "appVersion": "8.6.0",
+  "appVersion": "8.6.1",
   "btc": {
     "usd": 65066.5925,
     "aud": 93045.227275,
@@ -8873,7 +8873,7 @@
     }
   ],
   "buildMeta": {
-    "appVersion": "8.6.0",
+    "appVersion": "8.6.1",
     "sprint": "2",
     "gitCommit": "43143a1",
     "buildDate": "2026-07-23T14:21:59Z",

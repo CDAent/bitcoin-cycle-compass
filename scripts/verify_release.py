@@ -8,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = '8.6.0'
+RELEASE_VERSION = '8.6.1'
 DEFAULT_RELEASE_DIR = ROOT / 'dist' / 'release'
 
 
@@ -113,6 +113,9 @@ def main():
     ]:
         check(marker in index_text, label, failures)
     check('data-view="reports"' not in index_text, 'Reports is hidden from visible navigation', failures)
+    blocked_endpoint_tokens = ['your-private-endpoint', 'placeholder.example', 'demo', 'localhost', '127.0.0.1']
+    check(not any(token in index_text.lower() for token in blocked_endpoint_tokens), 'no sample or placeholder external AI endpoints in staged index', failures)
+    check('supportSubmit' in index_text and 'supportType' in index_text, 'Feedback & Support form controls exist in staged index', failures)
 
     ids = re.findall(r'id="([^"]+)"', index_text)
     duplicate_ids = [item for item, count in Counter(ids).items() if count > 1]

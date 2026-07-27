@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE_VERSION = '8.6.0'
+RELEASE_VERSION = '8.6.1'
 
 
 def _read(path):
@@ -196,3 +196,42 @@ def test_v860_alert_card_live_value():
     assert 'getLiveAlertValue' in html
     assert 'alert-live-row' in html
     assert 'alert-live-value' in html
+
+
+def test_v861_no_sample_external_research_url():
+    html = _read('index.html')
+    lowered = html.lower()
+    forbidden = [
+        'your-private-endpoint.example',
+        'placeholder.example',
+        'demo.example',
+        'http://localhost',
+        'http://127.0.0.1',
+    ]
+    assert not any(token in lowered for token in forbidden)
+
+
+def test_v861_support_form_exists():
+    html = _read('index.html')
+    assert 'supportType' in html
+    assert 'supportSubmit' in html
+    assert 'compassSupportEmail' in html
+
+
+def test_v861_pin_control_icon_only():
+    html = _read('index.html')
+    assert 'pin-label' not in html
+    assert 'Pin article for later' in html
+
+
+def test_v861_daily_candles_last_seven_days():
+    html = _read('index.html')
+    assert "if(range==='1d')return{rows:daily.slice(-7)" in html
+
+
+def test_v861_direction_based_movement_class_helper():
+    html = _read('index.html')
+    assert 'const movementClass=' in html
+    assert 'movement-pos' in html
+    assert 'movement-neg' in html
+    assert 'movement-neu' in html
