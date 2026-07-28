@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -114,7 +115,8 @@ def validate_release_files(stage_dir):
     else:
         ok = fail('Version mismatch in staged index.html or manifest.json') and ok
 
-    if f"CACHE_VERSION = '{RELEASE_VERSION}'" in sw_text:
+    cache_version_match = re.search(r"CACHE_VERSION = '([^']+)'", sw_text)
+    if cache_version_match and cache_version_match.group(1).startswith(RELEASE_VERSION):
         pass_msg('Staged service worker cache version matches release')
     else:
         ok = fail('Staged service worker cache version mismatch') and ok

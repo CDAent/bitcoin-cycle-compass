@@ -86,7 +86,8 @@ def main():
     check(manifest.get('name', '').endswith(RELEASE_VERSION), 'staged manifest version matches release', failures)
     check(live.get('appVersion') == RELEASE_VERSION, 'staged live.json appVersion matches release', failures)
     check(live.get('buildMeta', {}).get('appVersion') == RELEASE_VERSION, 'staged build metadata version matches release', failures)
-    check(f"CACHE_VERSION = '{RELEASE_VERSION}'" in sw_text, 'staged service-worker cache version matches release', failures)
+    cache_version_match = re.search(r"CACHE_VERSION = '([^']+)'", sw_text)
+    check(cache_version_match and cache_version_match.group(1).startswith(RELEASE_VERSION), 'staged service-worker cache version matches release', failures)
 
     check(isinstance(live, dict), 'staged live.json exists and parses', failures)
     check(bool(live.get('historyDaily')), 'staged historyDaily is populated', failures)

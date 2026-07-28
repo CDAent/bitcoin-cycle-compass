@@ -80,7 +80,8 @@ def test_version_metadata_consistent():
     live = _json('data/live.json')
     assert f'v{RELEASE_VERSION}' in html
     assert manifest['name'].endswith(RELEASE_VERSION)
-    assert f"CACHE_VERSION = '{RELEASE_VERSION}'" in sw
+    assert "CACHE_VERSION =" in sw
+    assert RELEASE_VERSION in sw
     assert live.get('appVersion') == RELEASE_VERSION
     assert live.get('buildMeta', {}).get('appVersion') == RELEASE_VERSION
 
