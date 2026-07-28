@@ -41,6 +41,9 @@ jobs:
             exit 1
           fi
 
+      - name: Install test runner
+        run: python3 -m pip install pytest
+
       - name: Run tests
         run: python3 -m pytest tests/ -q
 
