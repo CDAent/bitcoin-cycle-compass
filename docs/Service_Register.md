@@ -201,10 +201,21 @@ Services in Bitcoin Cycle Compass are Python scripts in the `scripts/` directory
 
 | Field | Value |
 |---|---|
-| **Purpose** | Top-level release coordination helper. Orchestrates the sequence of build, verify, and tag operations for a formal release. |
+| **Purpose** | Guarded release entry point. Enforces: clean tracked tree, branch must be `main`, HEAD must match `origin/main`, tag must match the version in `manifest.json`, tag must not already exist. Runs build, verify, pytest, and py_compile checks, then creates and pushes an annotated git tag. |
 | **Location** | `scripts/release.py` |
-| **Called By** | Manual execution by developer |
-| **Dependencies** | `build_release.py`, `verify_release.py`, `create_release_tag.py` |
+| **Called By** | Manual execution by developer (`python3 scripts/release.py --tag vX.Y.Z`) |
+| **Dependencies** | `build_release.py`, `verify_release.py` (called via subprocess); `pytest`, `py_compile` |
+
+| Function | Description | Returns |
+|---|---|---|
+| `ensure_clean_repo(label)` | Asserts no uncommitted changes to tracked files | Exits on failure |
+| `ensure_on_main()` | Asserts current branch is `main` | Exits on failure |
+| `ensure_at_origin_main_head()` | Fetches origin and asserts HEAD matches | Exits on failure |
+| `app_version()` | Reads version string from `manifest.json` | `str` version |
+| `ensure_tag_not_exists(tag)` | Asserts git tag does not already exist | Exits on failure |
+| `run_release_checks()` | Runs build, verify, pytest, py_compile in sequence | Exits on failure |
+| `create_and_push_tag(tag, message)` | Creates annotated tag and pushes to `origin` | None |
+| `main()` | Orchestrates all checks then creates and pushes tag | None |
 
 ---
 
@@ -212,10 +223,10 @@ Services in Bitcoin Cycle Compass are Python scripts in the `scripts/` directory
 
 | Field | Value |
 |---|---|
-| **Purpose** | Creates a git tag for the current release version after a successful build and verification. Enforces tag naming conventions. |
+| **Purpose** | Simpler standalone tag creation script. Enforces clean working tree, `main` branch, HEAD at `origin/main`, and tag uniqueness. Runs build, verify, pytest, and py_compile checks, then creates and pushes an annotated tag. Does not validate that the tag name matches the application version. Use `release.py` for full version-matched releases. |
 | **Location** | `scripts/create_release_tag.py` |
-| **Called By** | `release.py`, manual execution |
-| **Dependencies** | Python `subprocess` (git commands) |
+| **Called By** | Manual execution (`python3 scripts/create_release_tag.py --tag vX.Y.Z`) |
+| **Dependencies** | `build_release.py`, `verify_release.py` (called via subprocess) |
 
 ---
 

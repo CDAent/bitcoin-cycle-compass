@@ -290,17 +290,21 @@ A release is defined by a consistent version string across four files:
 | `index.html` | `APP_VERSION` constant and `<title>` |
 | `service-worker.js` | `CACHE_VERSION` constant |
 | `manifest.json` | `name` and `short_name` |
-| `scripts/update_data.py` | `_APP_VERSION` constant |
+| `scripts/update_data.py` | `_APP_VERSION` constant and `_SPRINT` constant |
 
 ### Steps to cut a release
 
-1. Update the version string in all four files (format: `X.Y.Z`).
-2. Run `python3 scripts/build_release.py` locally to validate.
-3. Run `python3 scripts/verify_release.py --release-dir dist/release`.
-4. Commit the version bump.
-5. Push to `main`.
-6. Monitor GitHub Actions to confirm deployment.
-7. Optionally run `python3 scripts/create_release_tag.py` to create a git tag.
+1. Update the version string in all four files (format: `X.Y.Z`). Update `_SPRINT` in `update_data.py` if the sprint number has changed.
+2. Confirm all tests pass: `python3 -m pytest tests/ -q`
+3. Run `python3 scripts/build_release.py --stage-dir dist/release` locally to validate the staged build.
+4. Run `python3 scripts/verify_release.py --release-dir dist/release` to confirm version consistency and required assets.
+5. Commit the version bump.
+6. Push to `main`.
+7. Monitor GitHub Actions to confirm deployment.
+8. To create an annotated git tag: `python3 scripts/release.py --tag vX.Y.Z`
+   - This enforces: branch is `main`, HEAD is at `origin/main`, tag matches version in `manifest.json`, tag is unique, full build/verify/test cycle passes.
+
+See [`Release_Checklist.md`](Release_Checklist.md) for the step-by-step checklist.
 
 ### `sync_manifest_versions()`
 

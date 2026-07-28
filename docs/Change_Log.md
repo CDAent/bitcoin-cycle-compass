@@ -135,16 +135,4 @@ _For the full project history, see the git log and GitHub release tags._
 
 ## Release Checklist
 
-Use this checklist when preparing a new release:
-
-- [ ] Update version string in `index.html` (`APP_VERSION`)
-- [ ] Update version string in `service-worker.js` (`CACHE_VERSION`)
-- [ ] Update version string in `manifest.json` (`name`, `short_name`)
-- [ ] Update version string in `scripts/update_data.py` (`_APP_VERSION`)
-- [ ] Add entry to this Change Log under `[Unreleased]` section
-- [ ] Move `[Unreleased]` entries to the new version section with the release date
-- [ ] Run `python3 scripts/build_release.py` locally
-- [ ] Run `python3 scripts/verify_release.py --release-dir dist/release`
-- [ ] Confirm all tests pass (`python3 -m pytest tests/ -q`)
-- [ ] Push to `main` and confirm GitHub Actions deployment succeeds
-- [ ] Optionally create a git tag with `python3 scripts/create_release_tag.py`
+See [`docs/Release_Checklist.md`](Release_Checklist.md) for the full step-by-step release checklist covering versioning, build, testing, validation, deployment, and git tagging.

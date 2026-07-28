@@ -251,6 +251,7 @@ Quick-reference guide to find any feature, function, constant, or section in the
 | `news()` | `scripts/update_data.py` | 307 | Fetches 3 Google News RSS feeds; scores articles; returns top 20 |
 | `events()` | `scripts/update_data.py` | 325 | Returns list of curated official event calendar links |
 | `_APP_VERSION` | `scripts/update_data.py` | 333 | Version string — must match `APP_VERSION` in `index.html` |
+| `_SPRINT` | `scripts/update_data.py` | 334 | Sprint number written into `live.json` build metadata |
 | `reports_payload(scores, trends, etf, macro, onchain)` | `scripts/update_data.py` | 337 | Builds the `reports` section of `live.json` |
 | `sync_manifest_versions(manifest_path)` | `scripts/update_data.py` | 363 | Updates `manifest.json` to match `_APP_VERSION` |
 | `_git_commit()` | `scripts/update_data.py` | 386 | Returns current git commit hash for build metadata |
