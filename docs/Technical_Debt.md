@@ -234,16 +234,14 @@ Currently up to 20 news articles are fetched and included in `live.json`. The Ne
 |---|---|
 | **Category** | Architecture |
 | **Severity** | Medium |
-| **Status** | Open |
+| **Status** | **Resolved — Issue 014** |
 
 The weighted composite score computation exists in two places:
 1. `update_data.py` (Python) — produces the server-side score stored in `live.json`
 2. `render()` in `index.html` (JavaScript) — re-derives the research score, regime score, bottom score, and peak score from raw DATA fields
 
-If the weighting logic diverges between Python and JS, the UI will display scores inconsistent with the stored values. A single source of truth would reduce this risk.
-
-**Resolution Path**  
-Compute all scores server-side in Python and publish them to `live.json`. The JS render function reads stored scores and does not re-derive them.
+**Resolution (Issue 014)**  
+All composite scores (`researchScore`, `opportunityScore`, `regimeScore`, `regime`, `bottomProb`, `peakProb`) are now computed in `update_data.py` and written to `live.json`. The `render()` function reads `d.researchScore??50`, `d.regimeScore??50`, `d.bottomProb??50`, and `d.peakProb??50` directly — no re-derivation. `getLiveAlertValue()` and `buildCompassAnalysis()` already read these fields by name; they require no further changes.
 
 ---
 

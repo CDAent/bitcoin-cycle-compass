@@ -817,12 +817,12 @@ function render(){
  const d=DATA;if(!d?.btc?.usd)return;const conv=CUR==='AUD'?d.fx.usdAud:1;const p=d.btc.usd*conv;const high=126200*conv;
  const baseBottom=high*.34,bLow=baseBottom*.88,bHigh=baseBottom*1.12,bSevL=high*.25,bSevH=high*.30,bShL=high*.40,bShH=high*.48;
  const peakConsL=baseBottom*3,peakConsH=baseBottom*3.6,peakBaseL=baseBottom*3.6,peakBaseH=baseBottom*4.8,peakStrongL=baseBottom*4.8,peakStrongH=baseBottom*6.2;
- const macro=d.macro?.score??50,onchain=d.onchain?.score??50,fear=d.fearGreed?.value??50,stableScore=clamp(50+(d.stablecoins?.change7d||0)*8,0,100),etfScore=d.etf?.score??50,btcLiquidity=d.liquidityScores?.['Bitcoin']??Math.round(.22*etfScore+.2*macro+.18*onchain+.2*fear+.2*stableScore);
- const research=Math.round(.24*btcLiquidity+.20*macro+.18*onchain+.18*fear+.20*stableScore);const regimeScore=Math.round(.28*macro+.22*btcLiquidity+.18*fear+.16*onchain+.16*etfScore);
+ const macro=d.macro?.score??50,onchain=d.onchain?.score??50,fear=d.fearGreed?.value??50,etfScore=d.etf?.score??50,btcLiquidity=d.liquidityScores?.['Bitcoin']??50;
+ const research=d.researchScore??50;const regimeScore=d.regimeScore??50;
  // Compare with previous week score if available
  const weeklyHist=window.__weeklyHistory||d.historyWeekly||[];const prevStored=Number(localStorage.getItem('btcPrevRegimeScore'));const prevScore=Number.isFinite(prevStored)?prevStored:null;
  const reg=regimeFromScore(regimeScore,prevScore);
- const bottomProb=clamp(Math.round(45+(Math.max(0,-((p/high-1)*100)-35))*.55+(50-fear)*.22+(50-macro)*.10),20,88);const peakProb=clamp(Math.round(18+(research-50)*.28+(regimeScore-50)*.18),10,55);
+ const bottomProb=d.bottomProb??50;const peakProb=d.peakProb??50;
  $('researchMarker').style.left=clamp(research,2,98)+'%';$('researchLabel').textContent=scoreLabel(research)+' • '+research+'%';setClass($('researchLabel'),research);$('confidence').textContent=Math.round((research+regimeScore)/2)+'%';
  // Dashboard regime card — compact display
  $('regimeAnimal').textContent=reg.animal;$('regimeTitle').textContent=reg.title;const regimeState=normalizeMarketState(regimeScore);$('regimeTitle').className='regime-title '+marketStateClass(regimeState);const moveLine=reg.moveText?`<span class="${movementClass((regimeScore-(prevScore==null?regimeScore:prevScore)))}">${reg.moveText}</span>`:'';$('regimePoints').innerHTML=[...reg.lines,moveLine].filter(Boolean).join('<br>');$('regimeScore').textContent=regimeScore+' /100';$('regimeScore').style.background=regimeState==='bullish'?'#143e1c':regimeState==='slightly-bullish'?'#13381d':regimeState==='neutral'?'#111821':regimeState==='slightly-bearish'?'#2a1e00':'#3d1212';
