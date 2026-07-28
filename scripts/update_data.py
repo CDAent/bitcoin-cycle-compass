@@ -701,6 +701,26 @@ def main():
       'Silver':float(proxies['silver'].get('change20d',0) or 0),
       'Other':0,
     }
+    # Issue 014 — single source of truth for all derived scores.
+    # All weighted composites are computed here and written to live.json.
+    # The browser reads these values directly; it does not re-derive them.
+    _CYCLE_HIGH_REF = 126200
+    _fear_val  = float(fg.get('value',  50))
+    _ma_sc     = float(ma.get('score',  50))
+    _ch_sc     = float(ch.get('score',  50))
+    _etf_sc    = float(etf.get('score', 50))
+    _st_sc     = clamp(50 + float(st.get('change7d') or 0) * 8)
+    research_score = clamp(round(0.24*btc_score + 0.20*_ma_sc + 0.18*_ch_sc + 0.18*_fear_val + 0.20*_st_sc))
+    regime_score   = clamp(round(0.28*_ma_sc + 0.22*btc_score + 0.18*_fear_val + 0.16*_ch_sc + 0.16*_etf_sc))
+    regime_label   = ('Bullish Expansion' if regime_score >= 68 else
+                      'Transition Zone'   if regime_score >= 48 else
+                      'Bear Contraction')
+    if btc:
+        _vs_high    = (float(btc) / _CYCLE_HIGH_REF - 1) * 100
+        bottom_prob = clamp(round(45 + max(0, -_vs_high - 35) * 0.55 + (50 - _fear_val) * 0.22 + (50 - _ma_sc) * 0.10), 20, 88)
+    else:
+        bottom_prob = 50
+    peak_prob = clamp(round(18 + (research_score - 50) * 0.28 + (regime_score - 50) * 0.18), 10, 55)
     live_news=safe(news,[]) or previous.get('news',[]) or []
 
     # v8.5: persist today's data to SQLite and read history back from the DB.
@@ -738,6 +758,6 @@ def main():
         'buildDate':now_utc if _DB_AVAILABLE else datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'databaseVersion':'2','lastSuccessfulUpdate':now_utc if btc else 'partial',
     }
-    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'reports':reports_payload(scores,trends,etf,ma,ch),'proxies':proxies,'news':live_news,'events':events(),'buildMeta':_build_meta_out}
+    out={'generatedAt':datetime.now(timezone.utc).isoformat(),'status':'Live scheduled research snapshot' if btc else 'Partial live snapshot • retained last BTC price','appVersion':_APP_VERSION,'btc':{'usd':btc,'aud':btc*aud if btc else None,'change24h':btc24,'method':'trimmed average / median check','sources':exchanges},'fx':{'usdAud':aud,'audUsd':1/aud},'fearGreed':fg,'stablecoins':st,'etf':etf,'macro':ma,'onchain':ch,'liquidityScores':scores,'liquidityTrends':trends,'historyWeekly':weekly_hist,'historyDaily':daily_hist,'reports':reports_payload(scores,trends,etf,ma,ch),'proxies':proxies,'news':live_news,'events':events(),'researchScore':research_score,'opportunityScore':research_score,'regimeScore':regime_score,'regime':{'label':regime_label,'score':regime_score},'bottomProb':bottom_prob,'peakProb':peak_prob,'buildMeta':_build_meta_out}
     OUT.parent.mkdir(exist_ok=True); OUT.write_text(json.dumps(out,indent=2),encoding='utf-8')
 if __name__=='__main__': main()
